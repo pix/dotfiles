@@ -1,0 +1,13 @@
+{{- /* implement templatable data support */ -}}
+{{- $ctx := . -}}
+{{- $data := glob (joinPath .chezmoi.sourceDir ".chezmoiexternals/*.yaml.tmpl") -}}
+{{- $data2 := glob (joinPath .chezmoi.sourceDir ".chezmoidata/*.yaml") -}}
+{{- $data := concat $data $data2 -}}
+{{ range $file := $data }}
+
+# {{ $file }}
+{{- $dataFile := includeTemplate $file $ctx -}}
+{{- range $doc := regexFindAll "# doc:.*" $dataFile -1 }}
+{{ $doc }}
+{{- end }}
+{{- end }}

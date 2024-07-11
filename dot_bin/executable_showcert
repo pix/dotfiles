@@ -1,0 +1,105 @@
+#!/bin/zsh
+# doc:command:showcert:devel:Show or save the certificate of a remote server\n  Usage: showcert [-s|-r] <cert-source> [port]\n    -s: Show certificate information (default)\n    -r: Save the root certificate
+
+usage() {
+    echo "Usage: $0 [-s|-r] <cert-source> [port]" >&2
+    echo "  -s: Show certificate information (default)"
+    echo "  -r: Save the root certificate"
+    exit 1
+}
+
+# Default action is to show the certificate
+ACTION="show"
+
+# Parse flags
+while getopts ":sr" opt; do
+    case ${opt} in
+        s )
+            ACTION="show"
+            ;;
+        r )
+            ACTION="save"
+            ;;
+        \? )
+            usage
+            ;;
+    esac
+done
+shift $((OPTIND -1))
+
+[[ -z $1 ]] && usage
+
+PORT=${2:-443}
+
+fetch() {
+    if [[ $1 == "-" ]]
+    then
+        cat
+    elif [[ -f $1 ]]
+    then
+        fetch_file $1
+    else
+        fetch_remote $1
+    fi
+}
+
+fetch_remote() {
+  : | openssl s_client -showcerts -connect $1:${PORT} 2>/dev/null | awk '/BEGIN CERTIFICATE/,/END CERTIFICATE/ {print}'
+}
+
+fetch_file() {
+    cat $1
+}
+
+sanitize_filename() {
+    echo "$1" | sed -e 's/[^a-zA-Z0-9._\ -]//g' -e 's/ /-/g' -e 's/--/-/g' -e 's/^-//' -e 's/-$//' 
+}
+
+save_root_cert() {
+    CERT_CHAIN=$(fetch_remote $1)
+    ROOT_CERT=$(echo "$CERT_CHAIN" | awk 'BEGIN {cert=""} /BEGIN CERTIFICATE/ {cert=$0; getline; while ($0 !~ /END CERTIFICATE/) {cert=cert"\n"$0; getline}; cert=cert"\n"$0; result=cert} END {print result}')
+    CA_NAME=$(echo "$ROOT_CERT" | openssl x509 -noout -issuer | sed 's/.*CN=//;s/[,/].*//')
+    SANITIZED_CA_NAME=$(sanitize_filename "$CA_NAME")
+    FILE_NAME="Ca-${SANITIZED_CA_NAME}.pem"
+
+    if [[ ! -f $FILE_NAME ]]
+    then
+        echo "$ROOT_CERT" > $FILE_NAME
+        echo "Saved root certificate to $FILE_NAME"
+    else
+        echo "Root certificate $FILE_NAME already exists"
+    fi
+}
+
+if [[ $ACTION == "save" ]]; then
+    save_root_cert $1
+    exit 0
+fi
+
+coproc openssl x509 -in /dev/stdin -noout -subject -issuer -startdate -enddate -ext subjectAltName | sed '/X509v3 Subject Alternative Name/ {n ; s/DNS://g ; s/, /\n    /g;}'
+
+fetch $1 >&p
+
+exec 3> >(LC_ALL=C sort)
+
+sort=0
+while read -t 0.5 -p line
+do
+    if [[ $line = notBefore=* ]]
+    then
+        date -d ${line#notBefore=} '+Since: %d.%m.%Y %T'
+        continue
+    elif [[ $line = notAfter=* ]]
+    then
+        date -d ${line#notAfter=} '+Until: %d.%m.%Y %T'
+        continue
+    fi
+
+    if (( sort == 1 ))
+    then
+        echo "   $line" >&3
+    else
+        [[ $line = 'X509v3 Subject Alternative Name:' ]] && sort=1
+        echo $line
+    fi
+done

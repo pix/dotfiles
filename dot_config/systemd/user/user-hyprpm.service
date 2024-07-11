@@ -1,0 +1,12 @@
+[Unit]
+Description=Reload Hyprland Plugin Manager
+Documentation=man:hyprpm
+PartOf=user-session-once.target
+
+[Service]
+Type=oneshot
+# Restart=always
+ExecStart=/sbin/hyprpm reload
+
+[Install]
+WantedBy=user-session-once.target

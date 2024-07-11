@@ -1,0 +1,7 @@
+{{- if (dig "features" "tools" "burp" false .) }}
+{{- range $ext, $opts := .config.burp.extensions }}
+.BurpSuite/bapps/{{ $opts.uuid }}:
+  type: "archive"
+  url: https://portswigger-cdn.net/bappstore/bapps/download/{{ $opts.uuid }}
+{{- end }}
+{{- end }}

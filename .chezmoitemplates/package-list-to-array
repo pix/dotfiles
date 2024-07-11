@@ -1,0 +1,40 @@
+# shellcheck disable=SC2034
+PACKAGES=(
+    {{- range $key, $cat := . }}
+        {{- range $value := $cat }}
+            {{- if eq (printf "%T" $value) "string" }}
+                {{ $value | quote }} \
+            {{- end }}
+        {{- end }}
+    {{- end }}
+)
+
+# shellcheck disable=SC2034
+PACKAGES_KEYS=(
+    {{- range $key, $cat := . }}
+        {{ (print "PACKAGES_" $key) | upper | quote }} \
+    {{- end }}
+)
+{{- range $key, $cat := . }}
+# shellcheck disable=SC2034
+PACKAGES_{{ $key | upper }}=(
+        {{- range $value := $cat }}
+            {{- if eq (printf "%T" $value) "string" }}
+                {{ $value | quote }} \
+            {{- end }}
+        {{- end }}
+)
+{{- end }}
+
+# shellcheck disable=SC2034
+PACKAGES_CUSTOM=(
+    {{- range $key, $cat := . }}
+        {{- range $value := $cat }}
+            {{- if not (eq (printf "%T" $value) "string") }}
+                {{- range $key, $item := $value }}
+                    {{ $item.pkg | quote }} {{ $item.url | quote }} \
+                {{- end }}
+            {{- end }}
+        {{- end }}
+    {{- end }}
+)

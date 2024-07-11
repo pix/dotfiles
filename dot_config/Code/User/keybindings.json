@@ -1,0 +1,17 @@
+/*
+# doc:binding:Ctrl+,:vscode:Display the file list menu (like Ctrl+P, mimic firefox's Ctrl+,)
+*/
+[
+    {
+        "key": "ctrl+shift+[KeyM]",
+        "command": "workbench.action.openSettings"
+    },
+    {
+        "key": "ctrl+[KeyM]",
+        "command": "-workbench.action.openSettings"
+    },
+    {
+        "key": "ctrl+[KeyM]",
+        "command": "workbench.action.quickOpen"
+    }
+]

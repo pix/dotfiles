@@ -1,0 +1,111 @@
+[user]
+	email = camille@moncelier.fr
+	name = Camille Moncelier
+
+[core]
+	{{- if .features.devel }}
+	pager = delta
+	{{- else }}
+	pager = less
+	{{ end }}
+
+[interactive]
+	diffFilter = delta --color-only
+
+[delta]
+	navigate = true    # use n and N to move between diff sections
+	# delta detects terminal colors automatically; set one of these to disable auto-detection
+	# dark = true
+	# light = true
+
+[alias]
+	assume   = update-index --assume-unchanged
+	unassume = update-index --no-assume-unchanged
+	assumed  = "!git ls-files -v | grep ^h | cut -c 3-"
+	snapshot = !git stash save "snapshot: $(date)" && git stash apply "stash@{0}"
+	ours   = "!f() { git checkout --ours $@ && git add $@; }; f"
+	theirs = "!f() { git checkout --theirs $@ && git add $@; }; f"
+	amend = commit --amend
+	br = branch
+	branches = branch --verbose -a
+	b = blame -CCCw
+	wdiff = diff --word-diff
+	ci = commit
+	co = checkout
+	df = diff
+	l = log --graph --decorate --oneline
+	lg = log -p
+	ls-ignores = !sh -c 'grep -hv "^#" $(git ls-files | grep .gitignore) .git/info/exclude | sed s:/\\$::g | xargs -I"{}" echo --ignore=\"{}\"'
+	remotes = remote --verbose show
+	st = status
+	out = log --pretty=oneline --abbrev-commit --graph ..@{u}
+	in = !git fetch && git log --pretty=oneline --abbrev-commit --graph @{u}..
+	mkarchive = "!f() { type=\"${1-zip}\"; prefix=\"${2-$(basename $PWD | sed -e s/\\.git$//g -e s/^\\.//g)}\"; version=\"${3-$(git describe --always --tags --dirty)}\"; git archive --prefix=\"${prefix}-${version}/\" HEAD -o \"${prefix}-${version}.${type}\"; }; f"
+	up = pull --rebase
+	fixme = grep --break --heading -n 'FIXME\\|TODO'
+	gg = grep --break --heading -n
+
+
+[apply]
+	whitespace = fix
+
+[branch]
+	autosetupmerge = true
+
+[diff]
+	colorMoved = default
+	algorithm = patience
+	mnemonicprefix = true
+	renames = copies
+
+[diff "zip"]
+	textconv = unzip -c -a
+
+[diff "tgz"]
+	textconv = tar -ztvf
+
+[diff "tbz"]
+	textconv = tar -jtvf
+
+[merge]
+	stat = true
+	conflictstyle = diff3
+
+[notes]
+	rewriteRef = "refs/notes/*"
+
+[notes "rewrite"]
+	amend = true
+	rebase = true
+
+[push]
+	default = tracking
+
+[rebase]
+	stat = true
+
+[rerere]
+	enabled = 1
+
+[url "git@github.com:pix/"]
+	pushInsteadOf = git://github.com/pix/
+
+#################################
+[color "branch"]
+	current = yellow reverse
+	local = yellow
+	remote = green
+
+[color "diff"]
+	frag = cyan
+	meta = blue bold
+	new = green
+	old = magenta
+
+[color "status"]
+	added = yellow
+	changed = green
+	untracked = cyan
+
+[color]
+	ui = auto

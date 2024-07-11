@@ -1,0 +1,206 @@
+#!/usr/bin/env python3
+
+import requests
+import json
+import argparse
+from datetime import datetime, timezone
+
+# Function to get weather information
+def get_weather_info():
+    url = "https://api.open-meteo.com/v1/forecast?latitude=48.112&longitude=-1.6743&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high,visibility,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min&forecast_days=1"
+    try:
+        response = requests.get(url, timeout=5)
+        if response.status_code == 200:
+            return response.json()
+    except requests.exceptions.RequestException:
+        return None
+
+def wmo_to_emoji(wmo_code, is_day=True):
+    # Dictionary mapping WMO codes to emojis for day and night
+    wmo_emoji_map_day = {
+        0: '☀️',
+        1: '🌤️', 2: '⛅', 3: '☁️',
+        45: '🌫️', 48: '🌫️',
+        51: '🌦️', 53: '🌧️', 55: '🌧️',
+        56: '🌧️❄️', 57: '🌧️❄️',
+        61: '🌧️', 63: '🌧️', 65: '🌧️',
+        66: '🌧️❄️', 67: '🌧️❄️',
+        71: '❄️', 73: '❄️', 75: '❄️',
+        77: '❄️',
+        80: '🌦️', 81: '🌧️', 82: '⛈️',
+        85: '❄️', 86: '❄️',
+        95: '⛈️',
+        96: '⛈️', 99: '⛈️'
+    }
+    
+    wmo_emoji_map_night = {
+        0: '🌕',
+        1: '☁️', 2: '☁️', 3: '☁️',
+        45: '🌫️', 48: '🌫️',
+        51: '🌧️', 53: '🌧️', 55: '🌧️',
+        56: '🌧️❄️', 57: '🌧️❄️',
+        61: '🌧️', 63: '🌧️', 65: '🌧️',
+        66: '🌧️❄️', 67: '🌧️❄️',
+        71: '❄️', 73: '❄️', 75: '❄️',
+        77: '❄️',
+        80: '🌧️', 81: '🌧️', 82: '⛈️',
+        85: '❄️', 86: '❄️',
+        95: '⛈️',
+        96: '⛈️', 99: '⛈️'
+    }
+    
+    # Choose the appropriate map based on the is_day parameter
+    wmo_emoji_map = wmo_emoji_map_day if is_day else wmo_emoji_map_night
+
+    # Return the corresponding emoji or a default one if the code is not found
+    return wmo_emoji_map.get(wmo_code, '❓')
+
+def wmo_to_text(wmo_code):
+    # Dictionary mapping WMO codes to descriptive text
+    wmo_text_map = {
+        0: 'Clear sky',
+        1: 'Mainly clear', 2: 'Partly cloudy', 3: 'Overcast',
+        45: 'Fog', 48: 'Depositing rime fog',
+        51: 'Light drizzle', 53: 'Moderate drizzle', 55: 'Dense drizzle',
+        56: 'Light freezing drizzle', 57: 'Dense freezing drizzle',
+        61: 'Slight rain', 63: 'Moderate rain', 65: 'Heavy rain',
+        66: 'Light freezing rain', 67: 'Heavy freezing rain',
+        71: 'Slight snowfall', 73: 'Moderate snowfall', 75: 'Heavy snowfall',
+        77: 'Snow grains',
+        80: 'Slight rain showers', 81: 'Moderate rain showers', 82: 'Violent rain showers',
+        85: 'Slight snow showers', 86: 'Heavy snow showers',
+        95: 'Slight or moderate thunderstorm',
+        96: 'Thunderstorm with slight hail', 99: 'Thunderstorm with heavy hail'
+    }
+
+    # Return the corresponding text or a default one if the code is not found
+    return wmo_text_map.get(wmo_code, 'Unknown weather condition')
+
+# Function to create a temperature bar chart histogram
+def create_histogram(temperatures, scale=1, unit = ''):
+    unicode_list = ['\u2581', '\u2582', '\u2583', '\u2584',
+                    '\u2585', '\u2586', '\u2587', '\u2588', ' ']
+    min_temp = min(temperatures)
+    max_temp = max(temperatures)
+    range_temp = max_temp - min_temp - 0.0000000001
+
+    # Normalize temperatures to the range of unicode_list
+    normalized_temps = [
+        int((temp - min_temp) / range_temp * (len(unicode_list) - 2))
+        for temp in temperatures
+    ]
+    
+    ret =  ''.join(unicode_list[n] for n in normalized_temps)
+
+    ret += f" | {min_temp}{unit} - {max_temp}{unit}"
+
+    return ret
+
+def create_clock_legend():
+    0, 6, 12, 18, 24
+    return "".join(["0", (" ") * 5, "6", (" ") * 4, "12", (" ") * 4, "18", (" ") * 3, "24"])
+
+# Get weather information
+weather_info = get_weather_info()
+
+if weather_info:
+    current = weather_info['current']
+    units = weather_info['current_units']
+    hourly = weather_info['hourly']
+    hourly_units = weather_info['hourly_units']
+    daily = weather_info['daily']
+    hourly_precip_prob = hourly['precipitation_probability']
+    hourly_precip = hourly['precipitation']
+    hourly_temps = hourly['temperature_2m']
+    hourly_apparent_temps = hourly['apparent_temperature']
+    
+    hourly_cloud_cover = hourly['cloud_cover']
+    hourly_cloud_cover_unit = hourly_units['cloud_cover']
+    hourly_wind_speed = hourly['wind_speed_10m']
+    hourly_wind_speed_unit = hourly_units['wind_speed_10m']
+
+    current_temp = current['temperature_2m']
+    current_temp_unit = units['temperature_2m']
+    current_apparent_temp = current['apparent_temperature']
+    current_apparent_temp_unit = units['apparent_temperature']
+    current_rain = current['rain']
+    current_rain_unit = units['rain']
+    current_pressure = current['pressure_msl']
+    current_pressure_unit = units['pressure_msl']
+    current_cloud_cover = current['cloud_cover']
+    current_cloud_cover_unit = units['cloud_cover']
+
+    daily_max_temp = daily['temperature_2m_max'][0]
+    daily_min_temp = daily['temperature_2m_min'][0]
+    daily_temp_unit = daily['temperature_2m_max']
+
+    temp_histogram = create_histogram(hourly_temps, unit=current_temp_unit)
+    apparent_temp_histogram = create_histogram(hourly_apparent_temps, unit=current_apparent_temp_unit)
+    precip_histogram = create_histogram(hourly_precip, scale=2, unit=current_rain_unit)
+    precip_prob_histogram = create_histogram(hourly_precip_prob, scale=2, unit='%')
+
+    # Determine the current hour in GMT
+    current_hour = datetime.now(timezone.utc).hour
+
+    # Check if rain is expected in the current or next hour
+    rain_expected_low = (hourly_precip_prob[current_hour] > 30 or
+                     hourly_precip_prob[(current_hour + 1) % 24] > 30)
+    rain_expected_high = (hourly_precip_prob[current_hour] > 60 or
+                      hourly_precip_prob[(current_hour + 1) % 24] > 60)
+    rain_expected_critical = (hourly_precip_prob[current_hour] > 90 or
+                         hourly_precip_prob[(current_hour + 1) % 24] > 90)
+            
+    rain_class = ""
+    if rain_expected_critical:
+        rain_class = "rain-critical"
+    elif rain_expected_high:
+        rain_class = "rain-high"
+    elif rain_expected_low:
+        rain_class = "rain-low"
+
+    rain_status = wmo_to_emoji(current['weather_code'], current['is_day'])
+
+    # Prepare the tooltip with pango markup
+    tooltip_str = f"<b>Weather:</b> {rain_status} {wmo_to_text(current['weather_code'])} | {'Day' if current['is_day'] else 'Night'}\n"
+    tooltip_str += f"<b>Temperature:</b> {current_temp}{current_temp_unit} (feels like: {current_apparent_temp}{current_apparent_temp_unit})\n"
+    if current_rain > 0:
+        tooltip_str += f"<b>Rain:</b> {current_rain}{current_rain_unit}\n"
+    tooltip_str += f"<b>Pressure:</b> {current_pressure} {current_pressure_unit}\n"
+    if current_cloud_cover > 0:
+        tooltip_str += f"<b>Cloud Cover:</b> {current_cloud_cover}{current_cloud_cover_unit}\n"
+    tooltip_str += f"<b>Daily Max Temp:</b> {daily_max_temp}{daily_temp_unit}\n"
+    tooltip_str += f"<b>Daily Min Temp:</b> {daily_min_temp}{daily_temp_unit}\n"
+    tooltip_str += f"<b>Rain Expected:</b> {'Yes' if rain_expected_low else 'No'}\n\n"
+    tooltip_str += f"<b>Temp Histogram:</b>\n\n{temp_histogram}\n{create_clock_legend()}\n\n"
+    tooltip_str += f"<b>Apparent Temp Histogram:</b>\n\n{apparent_temp_histogram}\n{create_clock_legend()}\n\n"
+    tooltip_str += f"<b>Precip Histogram:</b>\n\n{precip_histogram}\n{create_clock_legend()}\n\n"
+    tooltip_str += f"<b>Precip Prob Histogram:</b>\n\n{precip_prob_histogram}\n{create_clock_legend()}\n\n"
+    tooltip_str += f"<b>Wind Speed:</b>\n\n{create_histogram(hourly_wind_speed, unit=hourly_wind_speed_unit)}\n{create_clock_legend()}\n\n"
+    tooltip_str += f"<b>Cloud Cover:</b>\n\n{create_histogram(hourly_cloud_cover, unit=hourly_cloud_cover_unit)}\n{create_clock_legend()}"
+
+    # Prepare the JSON output
+    output_json = {
+        "text": rain_status,
+        "tooltip": tooltip_str,
+        "class": rain_class,
+    }
+else:
+    output_json = {
+        "text": "❌",
+        "tooltip": "Unable to fetch weather information",
+        "class": ""
+    }
+
+# Argument parsing
+parser = argparse.ArgumentParser(description='Show weather information.')
+parser.add_argument('--text', action='store_true', help='Show output in plain text format')
+parser.add_argument('--json', action='store_true', help='Show output in JSON format (default)')
+
+args = parser.parse_args()
+
+# Output based on arguments
+if args.text:
+    out = output_json["tooltip"].replace("<b>", "").replace("</b>", "")
+    print(out)
+else:
+    print(json.dumps(output_json))

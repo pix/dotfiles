@@ -1,0 +1,61 @@
+{{ template "bash-script" . }}
+{{ if not .features.ephemeral }}
+
+# package list format
+# packages:
+#   go:
+#     gopls: golang.org/x/tools/gopls@latest
+#      shfmt:
+#        url: mvdan.cc/sh/v3/cmd/shfmt@latest
+#        go_min_version: 1.21
+
+function go1_version() {
+    go version | awk '{print $3}' | cut -d. -f2
+}
+
+function install_go() {
+    if ! command -v go &> /dev/null; then
+        log_info '[GO] Go is not installed, skipping: '"$1"
+        exit 1
+    fi
+
+    # if version is > 1.17, use go install
+    if [[ "$(go1_version)" -ge 17 ]]; then
+        PKG=$1
+        # if not @ is present, use latest
+        if [[ $1 != *@* ]]; then
+            PKG=$1@latest
+        fi
+        if ! go install -v "$PKG" 2>/dev/null; then
+            log_err '[GO] Failed to install '"$PKG"
+        else 
+            log '[GO] Installed '"$1"
+        fi
+    else
+        if ! go get -u "$1" 2>/dev/null; then
+            log_err '[GO] Failed to install '"$1"
+        else 
+            log '[GO] Installed '"$1"
+        fi
+    fi
+}
+
+{{ range $pkg, $subpkg := .packages.go }}
+log '[GO] Installing '{{ $pkg | quote }}
+{{ if not (eq (printf "%T" $subpkg) "string") }}
+# if $subpkg.go_min_version is set, check if go version is greater than or equal to it
+{{ if dig "go_min_version" false $subpkg }}
+if [[ "$(go1_version)" -ge {{ dig "go_min_version" 1 $subpkg }} ]]; then
+    install_go {{ $subpkg.url | quote }}
+else
+    log_info '[GO] Skipping install of '{{ $subpkg.url | quote }}' as go version ('"$(go1_version)"') is less than required {{ dig "go_min_version" 1 $subpkg }}'
+fi
+{{ else }}
+install_go {{ $pkg.url | quote }}
+{{ end }}
+{{ else }}
+install_go {{ $subpkg | quote }}
+{{ end }}
+{{ end }}
+
+{{- end }}

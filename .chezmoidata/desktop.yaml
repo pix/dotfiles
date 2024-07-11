@@ -1,0 +1,33 @@
+config:
+  waybar:
+    theme: "pix"
+  swaync:
+    theme: "mocha"
+  prezto:
+    version: "9195b66161b196238cbd52a8a4abd027bdaf5f73"
+  zsh:
+
+# doc:command:git-ignore:devel:Manage and add entries to .gitignore files
+    plugins:
+      wookayin/fzf-fasd: 5552cdc6316ecd440a791175b8d3b1661d3dc2d7
+      laggardkernel/git-ignore: 98fa9e55b383bc5633fe9bc09c8e9169b455c6c5
+
+  systemd:
+    system: []
+    user:
+      - user-blueman-applet
+      - user-cliphist-image
+      - user-cliphist
+      - user-hypridle
+      - user-hyprland-autoname-workspaces
+      - user-hyprpip
+      - user-hyprpm
+      - user-hyprwatchr
+      - user-kdeconnect-indicator
+      - user-kdeconnectd
+      - user-nm-applet
+      - user-pypr
+      - user-ssh-agent
+      - user-swaync
+      - user-swww
+      - user-waybar

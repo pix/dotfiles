@@ -1,0 +1,12 @@
+[Unit]
+Description=HyprWatchr Background Service
+Documentation=man:hyprwatchr
+PartOf=user-session.target
+
+[Service]
+Type=simple
+Restart=always
+ExecStart=%h/.bin/hyprwatchr --daemon
+
+[Install]
+WantedBy=user-session.target

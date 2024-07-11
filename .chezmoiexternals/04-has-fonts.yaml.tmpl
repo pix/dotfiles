@@ -1,0 +1,23 @@
+{{- if (dig "features" "fonts" false .) -}}
+
+{{ $fonts := list
+    "AnonymousPro"
+    "FiraMono"
+    "Hack"
+    "JetBrainsMono"
+    "SourceCodePro"
+    "Ubuntu"
+    "UbuntuMono"
+    "UbuntuSans"
+    "ZedMono"
+}}
+
+{{- range $font := $fonts }}
+.local/share/fonts/{{ $font }}NerdFont/:
+    type: "archive"
+    url: {{ gitHubLatestReleaseAssetURL "ryanoasis/nerd-fonts" (printf "%s.zip" $font) | quote }}
+    include:
+        - "*.ttf"
+        - "*.otf"
+{{- end }}
+{{- end }}

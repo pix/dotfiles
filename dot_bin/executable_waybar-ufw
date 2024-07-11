@@ -1,0 +1,63 @@
+#!/usr/bin/env python3
+
+import subprocess
+import json
+
+# Function to execute shell commands
+def run_command(command):
+    result = subprocess.run(command, shell=True, capture_output=True, text=True)
+    return result.stdout.strip()
+
+# Get UFW status and filter for allowed ports
+ufw_status = run_command('sudo ufw status | grep ALLOW')
+
+# Function to get lsof details for a specific port
+def get_lsof_details(port, protocol):
+    lsof_output = run_command(f'sudo lsof -ni :{port}')
+    if lsof_output:
+        details = []
+
+        for line in lsof_output.splitlines()[1:]:  # Skip the header
+            parts = line.split()
+            if len(parts) >= 9:
+                command = parts[0]
+                pid = parts[1]
+                proto = parts[7]
+                proto_type = parts[4]
+                if not line.endswith('(LISTEN)'):
+                    continue
+                if protocol != proto_type:
+                    continue
+                dot = '🟢' 
+                details.append(f"{dot} {command} (PID: {pid}, {proto})")    
+        if len(details) == 0:
+            details.append("🔴 No service") 
+        return details
+    return ["🔴 No service"]
+
+# Prepare the UFW allowed ports string
+ports_info = []
+for line in ufw_status.splitlines():
+    parts = line.split()
+    if len(parts) >= 3:
+        port = parts[0]
+        protocol = 'IPv4' if '(v6)' not in parts[1] else 'IPv6'
+        lsof_details = get_lsof_details(port, protocol)
+        for detail in lsof_details:
+            ports_info.append(f"{port} ({protocol}): {detail}")
+
+# Count the number of allowed ports
+number_allowed_ports = len(ports_info)
+
+# Create the tooltip string
+tooltip_str = '\n'.join(ports_info)
+
+# Prepare the JSON output
+output = {
+    "text": str(number_allowed_ports),
+    "tooltip": tooltip_str,
+    "class": ""
+}
+
+# Print the JSON output
+print(json.dumps(output))

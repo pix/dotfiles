@@ -1,0 +1,107 @@
+config:
+  burp:
+    extensions:
+      # Low: Detects CSP header weaknesses
+      # This plugin passively scans for CSP headers revealing known bypasses and
+      # potential vulnerabilities, requiring Jython 2.7 or newer for operation.
+      csp-bypass-plugin:
+        uuid: "b113bdc1390647b092cb527c0b95116d"
+        loaded: true
+        impact: low
+
+      # Low: Enhances vulnerability detection in authorization tests
+      # Autorize automates authorization testing in web applications by repeating
+      # requests under different user roles to identify vulnerabilities, offering
+      # both pre-configured and customizable options to tailor testing.
+      authorize:
+        uuid: f9bbac8c4acf4aefa4d7dc92a991af2f
+        loaded: true
+        impact: low
+
+      # Low: Detects vulnerable JavaScript libraries
+      # Retire.js passively scans JavaScript files to identify vulnerabilities,
+      # aiding in securing web applications by highlighting outdated libraries that
+      # pose security risks.
+      retire.js:
+        uuid: 36238b534a78494db9bf2d03f112265c
+        loaded: true
+        impact: low
+
+      # Low: Tests for Web Cache Deception vulnerabilities
+      # This plugin checks applications for the Web Cache Deception vulnerability by
+      # integrating a new Active Scanner check and offering a targeted test via a
+      # context menu item.
+      web-cache-deception-scanner:
+        uuid: "7c1ca94a61474d9e897d307c858d52f0"
+        loaded: true
+        impact: low
+
+      # High: Enhances J2EE application security testing
+      # J2EEScan expands test coverage during J2EE web application penetration tests
+      # by adding over 80 unique security cases and new strategies for identifying
+      # vulnerabilities.
+      j2ee-scan:
+        uuid: "7ec6d429fed04cdcb6243d8ba7358880"
+        loaded: false
+        impact: high
+
+      # Low: Simplifies HTTP request analysis
+      # This plugin offers a straightforward method for highlighting HTTP requests
+      # based on header content, aiding in quick identification and analysis within
+      # Burp Suite.
+      request-highlighter:
+        uuid: 11729a617d8d4d3b87c82e34b71885c3
+        loaded: true
+        impact: low
+
+      # None: Enhances TLS configuration management
+      # Adds a straightforward option in the context menu for directly managing TLS
+      # Pass Through settings in Burp Suite, streamlining the process.
+      add-to-tls-pass-through:
+        uuid: db62b6a29eb24765a9225890b3ad769b
+        loaded: true
+        impact: none
+
+      # Low: Identifies and retrieves backup and outdated files
+      # Backup Finder is a Burp Suite extension that scans for backup, old, temporary,
+      # and unreferenced files on web servers, which might contain sensitive information. 
+      # It supports dynamic payload generation based on the target's characteristics, 
+      # enhancing the effectiveness of the scan.
+      backup-finder:
+        uuid: 466bc6cbf5bb4449b56af7bd9c0000ea
+        loaded: true
+        impact: low
+
+      # Low: Enhances Burp Suite's appearance customization
+      # Customizer allows users to apply third-party themes to Burp Suite, utilizing 
+      # the FlatLaf library for better integration with the IntelliJ platform,
+      # thereby enhancing the user interface customization capabilities.
+      customizer:
+        uuid: 4265b6220a524d0da966e64e94fa9b26
+        loaded: true
+        impact: low
+
+      # Low: Detects host header injection vulnerabilities
+      # Host Header Inchecktion actively tests various host header injections to uncover
+      # vulnerabilities, creating scan issues if injections succeed. It enhances security
+      # by testing for server-side request forgery, restricted feature bypass, 
+      # and cache poisoning.
+      host-header-inchecktion:
+        uuid: 3908768b9ae945d8adf583052ad2e3b3
+        loaded: true
+        impact: low
+
+      # Low: This extension detects potential DoS attacks caused by image size parameters.
+      # It can also detect ImageTragick (CVE-2016-3714) based on timing in active scanning mode.
+      image-size-issues:
+        uuid: 1b602a9ae78a4ba4bc9f7b2c405a2b4e
+        loaded: true
+        impact: low
+
+      # Low: This extension allows execution of custom Python scripts with HTTP requests/responses.
+      # Scripts are typed into the "Python Scripts" tab and executed for each HTTP request/response.
+
+      python-scripter:
+        uuid: eb563ada801346e6bdb7a7d7c5c52583
+        loaded: true
+        impact: low

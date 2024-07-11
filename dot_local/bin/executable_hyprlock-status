@@ -1,0 +1,4 @@
+#!/bin/sh
+# doc:command:hyprlock-status:hyprland:Render the lower status bar for hyprlock
+
+echo "$(uptime) - $(battery-status)"

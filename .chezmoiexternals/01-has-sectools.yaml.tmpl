@@ -1,0 +1,42 @@
+{{- if (dig "features" "tools" "seclist" false .) }}
+work/data/seclists:
+    type: "git-repo"
+    url: "https://github.com/danielmiessler/SecLists"
+    clone:
+        args: ["--recurse-submodules", "--depth=1"]
+
+# doc:command:trivy:shell:Trivy is a simple and comprehensive vulnerability scanner for containers and other artifacts
+.local/bin/trivy:
+  {{- $arch := includeTemplate "get-arch" (list . (dict 
+    "386" "32bit" 
+    "amd64" "64bit" 
+    "arm" "ARM" 
+    "arm64" "ARM64"
+  )) }}
+  type: archive-file
+  url: {{ gitHubLatestReleaseAssetURL "aquasecurity/trivy" (printf "trivy_*_Linux-%s.tar.gz" $arch) | quote }}
+  path: trivy
+
+# doc:command:trufflehog:pwning:Find leaked credentials in git, github, gitlab, docker, s3, filesystem (files and directories), etc.
+.local/bin/trufflehog:
+  type: archive-file
+  url: {{ gitHubLatestReleaseAssetURL "trufflesecurity/trufflehog" (printf "trufflehog_*_%s_%s.tar.gz" .chezmoi.os .chezmoi.arch) | quote }}
+  path: trufflehog
+
+# doc:command:gitleaks:pwning:Gitleaks is a SAST tool for detecting and preventing hardcoded secrets like passwords, api keys, and tokens in git repos.
+.local/bin/gitleaks:
+  {{- $arch := includeTemplate "get-arch" (list . (dict 
+    "386" "x32" 
+    "amd64" "x64" 
+    "arm" "armv7" 
+    "arm64" "arm64"
+  )) }}
+  type: archive-file
+  url: {{ gitHubLatestReleaseAssetURL "gitleaks/gitleaks" (printf "gitleaks_*_%s_%s.tar.gz" .chezmoi.os $arch) | quote }}
+  path: gitleaks
+
+.local/java/uber-apk-signjer.jar:
+  type: file
+  url: {{ gitHubLatestReleaseAssetURL "patrickfav/uber-apk-signer" (printf "uber-apk-signer-*.jar") | quote }}
+
+{{- end -}}

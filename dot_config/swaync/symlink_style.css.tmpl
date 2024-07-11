@@ -1,0 +1,3 @@
+{{- $filename := joinPath .chezmoi.homeDir ".config/swaync/themes" .config.swaync.theme  -}}
+{{- $filename = printf "%s.css" $filename -}}
+{{ $filename -}}

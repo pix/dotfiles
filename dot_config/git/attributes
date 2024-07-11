@@ -1,0 +1,5 @@
+*.zip diff=zip
+*.tgz diff=tgz
+*.tar.gz diff=tgz
+*.tbz diff=tbz
+*.tar.bz2 diff=tbz

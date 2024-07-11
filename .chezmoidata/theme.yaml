@@ -1,0 +1,15 @@
+font:
+  serif: "Ubuntu Nerd Font Propo"
+  sansserif: "UbuntuSans Nerd Font Propo"
+  mono: "UbuntuSansMono Nerd Font Propo"
+  emoji: "Noto Color Emoji"
+gui:
+  theme:
+    icon: "Chicago95-tux"
+    gtk_theme: "Arc-Dark"
+    # gtk2_theme: "Arc" # Fall back gtk2 theme
+    gtk_cursor_theme: "Adwaita"
+    gtk_font: "sans-serif 10"
+    qt_font_fixed: "UbuntuSansMono Nerd Font Propo,10,-1,5,50,0,0,0,0,0"
+    qt_font_general: "UbuntuSans Nerd Font Propo,10,-1,5,50,0,0,0,0,0"
+    qt_kvantum_theme: "ArcDark"

@@ -1,0 +1,25 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- $srcData := .chezmoi.stdin -}}
+{{- if not (eq $srcData "") -}}
+    {{- $src := fromJson .chezmoi.stdin -}}
+    {{- $src := setValueAtPath "user_options.extender.ruby.location_of_jruby_jar_file" (printf "%s/%s" .chezmoi.homeDir ".local/burp/classpath/jruby-complete.jar") $src -}}
+    {{- $src := setValueAtPath "user_options.extender.python.location_of_jython_standalone_jar_file" (printf "%s/%s" .chezmoi.homeDir ".local/burp/classpath/jython-standalone.jar") $src -}}
+    {{- $src := setValueAtPath "user_options.extender.java.folder_for_loading_library_jar_files" (printf "%s/%s" .chezmoi.homeDir ".local/burp/classpath") $src -}}
+    {{- $src := setValueAtPath "user_options.misc.http_message_search.autoscroll_to_match_by_default" true $src -}}
+    {{- $exts := list }}
+    {{- $config := .config.burp.extensions -}}
+    {{- range $ext := $src.user_options.extender.extensions }}
+        {{- range $myExt, $opts := $config }}
+            {{- if hasKey $ext "bapp_uuid" }}
+                {{- if eq $ext.bapp_uuid $opts.uuid }}
+                    {{- if hasKey $opts "loaded" }}
+                        {{- $ext := setValueAtPath "loaded" $opts.loaded $ext -}}
+                    {{- end }}
+                {{- end }}    
+            {{- end }}
+        {{- end }}
+        {{- $exts = append $exts $ext -}}
+    {{- end }}
+    {{- $src := setValueAtPath "user_options.extender.extensions" $exts $src -}}
+    {{- toPrettyJson $src -}}
+{{- end -}}

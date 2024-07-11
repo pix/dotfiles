@@ -1,0 +1,12 @@
+[Unit]
+Description=waybar
+Documentation=man:waybar
+PartOf=user-session.target
+
+[Service]
+Type=simple
+Restart=always
+ExecStart=/usr/bin/waybar
+
+[Install]
+WantedBy=user-session.target

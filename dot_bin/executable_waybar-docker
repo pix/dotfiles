@@ -1,0 +1,43 @@
+#!/usr/bin/env python3
+import subprocess
+import argparse
+import json
+import sys
+
+# Function to execute shell commands
+def run_command(command):
+    result = subprocess.run(command, shell=True, capture_output=True, text=True)
+    return result.stdout.strip()
+
+# Get running containers information
+running_containers = run_command('docker ps --format "{{.ID}} | {{.Names}} | {{.Image}} | {{.Ports}} | {{.Status}}"').replace("|  |", "|")
+
+# Prepare the running containers string
+running_containers_str = running_containers
+
+# Count running containers
+number_running_containers = len(running_containers.splitlines())
+
+# Count total containers
+number_total_containers = int(run_command('docker ps -qa | wc -l'))
+
+# Prepare the JSON output
+output = {
+    "text": str(number_running_containers) if number_running_containers > 0 else "",
+    "tooltip": running_containers_str,
+    "class": ""
+}
+
+parser = argparse.ArgumentParser(description='Show running Docker containers.')
+parser.add_argument('--has-containers', action='store_true', help='Show the number of running containers')
+parser.add_argument('--json', action='store_true', help='Output the JSON object')
+
+args = parser.parse_args()
+
+if args.has_containers:
+    if number_running_containers > 0:
+        sys.exit(0)
+    else:
+        sys.exit(1)
+else:
+    print(json.dumps(output))

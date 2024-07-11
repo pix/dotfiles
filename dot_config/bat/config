@@ -1,0 +1,9 @@
+# -*-ini-*- vim:syntax=dosini
+
+--pager="less --RAW-CONTROL-CHARS --quit-if-one-screen --ignore-case --mouse"
+
+--map-syntax="*.tmpl:Go"
+--map-syntax="*.ino:C++"
+--map-syntax="*ignore:Git Ignore"
+--map-syntax="*zsh*:Bourne Again Shell (bash)"
+--map-syntax="*zlogin*:Bourne Again Shell (bash)"

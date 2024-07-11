@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+# doc:command:fd-preview:shell:Preview files and directories with fd, bat and eza
+set -euEo pipefail
+function fd-preview() {
+    local target
+    local pattern=""
+    local range_mode=false
+
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            -p)
+                shift
+                pattern="$1"
+                ;;
+            -r)
+                range_mode=true
+                ;;
+            *)
+                target="$1"
+                ;;
+        esac
+        shift
+    done
+
+    if [ -z "$target" ]; then
+        echo "No target specified."
+        return 1
+    fi
+
+    if [ -f "$target" ]; then
+        if command -v bat &> /dev/null; then
+            if [ -n "$pattern" ]; then
+                matches=$((rg --no-heading -n "$pattern" "$target" || true) | awk -F ':' '{print $1}')
+                highlight_opts=$(echo -n "$matches" | awk '{print "--highlight-line " $1}')
+                
+                if $range_mode; then
+                    line_range_opts=$(echo -n "$matches" | awk '{min = ($1 > 3) ? $1 - 3 : 1; max = $1 + 3; print "--line-range " min ":" max}')
+                    bat --paging never --color always $highlight_opts $line_range_opts "$target"
+                else
+                    bat --paging never --color always $highlight_opts "$target"
+                fi
+            else
+                bat --paging never --color always "$target"
+            fi
+        else
+            cat "$target"
+        fi
+    elif [ -d "$target" ]; then
+        if command -v eza &> /dev/null; then
+            eza --group-directories-first -l --color=always --git "$target"
+        else
+            ls -l --color=always "$target"
+        fi
+    fi
+}
+
+function main() {
+    if [ $# -lt 1 ]; then
+        echo "usage: $(basename $(realpath $0)) <target> [-p <pattern>] [-r]"
+        return 1
+    fi
+
+    fd-preview "$@"
+}
+
+main "$@"

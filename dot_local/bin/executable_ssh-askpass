@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Remember to export SSH_ASKPASS=~/.local/bin/ssh-askpass in your .bashrc
+RESULT=$(pinentry-curses --ttytype=xterm-color --lc-ctype=en_US.UTF8 --ttyname=/dev/tty <<END | grep -E '^(D|ERR)'
+SETDESC Enter your SSH password:
+SETPROMPT
+GETPIN
+END
+)
+
+if [ "$RESULT" == "ERR 111 canceled" ]; then
+    exit 255
+else
+    echo ${RESULT:2:${#RESULT}-2}   
+fi

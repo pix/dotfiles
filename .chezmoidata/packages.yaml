@@ -1,0 +1,240 @@
+packages:
+
+  lazyvim_extras:
+    - lazyvim.plugins.extras.coding.copilot
+    - lazyvim.plugins.extras.coding.copilot-chat
+    - lazyvim.plugins.extras.util.chezmoi
+  
+  lazyvim_extensions:
+    "folke/tokyonight.nvim":
+      opts:
+        transparent: true
+        style: "moon"
+        styles:
+           sidebars: transparent
+           floats: transparent
+    "nosduco/remote-sshfs.nvim":
+      dependencies:
+        - "nvim-telescope/telescope.nvim"
+      opts:
+        # Refer to the configuration section below
+        # or leave empty for defaults
+    "kilavila/nvim-bufferlist":
+      # doc:binding:Ctrl+v Ctrl+v:nvim:Display the buffer selection menu
+      init: |
+        vim.cmd([[
+          map <silent> <C-v><C-v> :BufferListOpen<CR>
+          map <silent> <C-v>v     :BufferListOpen<CR>
+        ]])
+    "lambdalisue/suda.vim":
+      init: |
+        vim.cmd([[
+          let g:suda_smart_edit = 1
+        ]])
+
+
+  # List of VSCode extensions to install
+  # these extensions are installed if code is installed
+  vscode_extensions:
+    helm:
+      - tim-koehler.helm-intellisense
+    go:
+      - golang.go-nightly
+      - golang.go
+    copilot:
+      - github.copilot-chat
+      - github.copilot
+    python:
+      - ms-python.vscode-pylance
+      - ms-python.python
+      - ms-python.debugpy
+    yaml:
+      - redhat.vscode-yaml
+      - ms-kubernetes-tools.vscode-kubernetes-tools
+    candy:
+      - talhabalaj.actual-font-changer
+      - foxundermoon.shell-format
+      - dlasagno.wal-theme
+    remote:
+      - ms-vscode.remote-server
+      - ms-vscode.remote-explorer
+      - ms-vscode-remote.vscode-remote-extensionpack
+      - ms-vscode-remote.remote-wsl
+      - ms-vscode-remote.remote-ssh-edit
+      - ms-vscode-remote.remote-ssh
+      - ms-vscode-remote.remote-containers
+    themes:
+      - monokaiblackwal.monokai-black-wal
+    makefile:
+      - ms-vscode.makefile-tools
+
+  # List of packages to install with pipx
+  # these packages are installed in ~/.local/pipx/venvs and symlinked to ~/.local/bin
+  # Some package are configured in .chezmoitemplates/data/packages.yaml.tmpl
+  pipx:
+    # Provide a nice interface to share files over HTTP (better python -m http.server)
+    updog:
+      pkg: "git+https://github.com/sc0tfree/updog"  
+  
+  # List of packages to install with go
+  # these packages are installed in ~/go/bin
+  go:
+    gopls: golang.org/x/tools/gopls@latest
+    shfmt:
+      url: mvdan.cc/sh/v3/cmd/shfmt
+      go_min_version: 21
+
+
+  # List of packages to install on linux
+  linux:
+
+    # Common packages for all distributions, hope the package name is the same
+    # for all distributions...
+    common: &x-common
+      misc:
+        - kitty
+        - ncdu
+        - fzf
+        - git
+      parsing:
+        - ripgrep
+        - jq
+        - yq
+        - gron
+      
+
+    # Packages for debian based distributions
+    #
+    like_debian:
+      chezmoi:
+        - fontconfig
+        - golang # ben oui, sinon pour les installes go, ça va pas le faire
+        - wget
+        - python3-pip
+        - python3-venv
+        - python3-dev
+        - python3-requests
+        - rustc
+        - cargo
+        - zsh
+
+      misc:
+        - apt-transport-https
+        - golang-go
+
+      custom_deb_packages:
+        - onlyoffice-desktopeditors:
+            pkg: onlyoffice-desktopeditors
+            url: "https://download.onlyoffice.com/install/desktop/editors/linux/onlyoffice-desktopeditors_amd64.deb"
+        - code:
+            pkg: code
+            url: "https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64"
+
+    # Packages for kali linux
+    #
+    kali:
+      <<: *x-common
+      tools:
+        - ncurses-term
+        - eza
+
+    # Packages for archlinux (btw) based distributions
+    #
+    arch:
+      <<: *x-common
+      cli_tools:
+        - tree
+        - btop
+        - htop
+        - rsync
+        - neovim
+        - git
+        - glow
+        - most
+        - pwgen
+        - tldr
+        - direnv
+        - bat
+        - yazi
+
+      archives:
+        - unrar
+        - unzip
+        - unrar
+        - unace
+        - atool
+
+      python:
+        - python-pipx
+
+
+      desktop_environment:
+        - blueman
+        - cliphist
+        - gnome-disk-utility
+        - gnome-power-manager
+        - lxappearance
+        - pcmanfm-gtk3
+        - thunar
+        - gedit
+        - eog
+        - file-roller
+        - kdeconnect
+        - kitty
+        - network-manager-applet
+        - paprefs
+        - rofi-wayland
+        - starship
+        - meld
+
+      theme:
+        - qt5ct
+        - qt6ct
+        - kvantum-theme-arc
+        - kvantum-theme-adapta
+
+      wayland_specific:
+        - waybar
+        - adapta-gtk-theme
+        - hypridle
+        - hyprland-autoname-workspaces-git
+        - hyprlock
+        - hyprpaper
+        - hyprpicker
+        - hyprprop
+        - hyprshot
+        - hyprwayland-scanner
+        - nwg-look
+        - nwg-panel
+        - openvpn-update-systemd-resolved
+        - python-rofi
+        - qemu-audio-pipewire
+        - wf-recorder
+        - wl-screenrec-git
+        - sway
+
+      development_tools:
+        - go
+        - rustup
+        - visual-studio-code-bin
+
+      productivity_apps:
+        - libreoffice-fresh-fr
+        - onlyoffice-bin
+        - freerdp2
+        - remmina
+        - firefox
+        - google-chrome
+
+      utilities:
+        - lazydocker-bin
+        - v4l2loopback-utils
+        - wireguard-tools
+
+      audio_video:
+        - easyeffects
+        - helvum
+        - spotube-bin
+
+      security_tools:
+        - ufw

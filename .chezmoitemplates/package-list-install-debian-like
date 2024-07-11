@@ -1,0 +1,87 @@
+{{ template "package-list-to-array" . }}
+# This ^ define PACKAGE (package list) and PACKAGE_CUSTOM_URL(tuple of package and url) arrays
+
+# if dpkg or apt is not installed, exit
+if ! command -v dpkg &> /dev/null || ! command -v apt &> /dev/null; then
+    echo "[!] [APT] dpkg or apt is not installed"
+    exit 1
+fi
+
+function log_and_run() {
+    filename="${1}"
+    shift
+    echo "--------------------" >> "${filename}"
+    echo "[!] [APT] Running: $@" >> "${filename}"
+
+    "$@" >> "${filename}" 2>&1
+    if [[ ${PIPESTATUS[0]} -ne 0 ]]; then
+        echo "[!] [APT] Failed to run: $@"
+        echo "[!] [APT] Failed to run: $@" >> "${filename}"
+        return 1
+    fi
+
+    return 0
+}
+
+function apt_install() {
+    log "[APT] $@"
+    # Ensure that all the packages exists before running apt
+    declare -a filtered_packages
+    for package in "$@"; do
+        if ! apt-cache policy "$package" 2>&1 | grep -q "^${package}:$"; then
+            log_info "[APT] Package $package not found"
+        else
+            filtered_packages+=("$package")
+        fi
+    done
+    log_and_run "/tmp/chezmoi-install.log" sudo apt install -yq "${filtered_packages[@]}"
+}
+
+function custom_install() {
+    log "[APT] Installing $1 from $2"
+    package_name=$1
+    package_url=$2
+
+    # Skip if package is already installed
+    if dpkg-query -W -f='${Status}' "$package_name" 2>/dev/null | grep -q "ok installed"; then
+        log "[APT] $package_name is already installed"
+        return 0
+    fi
+
+    temp_dir=$(mktemp -d)
+    trap 'rm -rf "$temp_dir"' RETURN
+
+    log "[APT] Downloading $package_name (from $package_url)"
+    log_and_run "/tmp/chezmoi-install.log" wget -P "$temp_dir" "$package_url" -O "$temp_dir/package.deb"
+    if [[ $? -ne 0 ]]; then
+        log_err "[APT] Failed to download $package_name"
+        return 1
+    fi
+
+    log_and_run "/tmp/chezmoi-install.log" sudo dpkg -i "$temp_dir/package.deb"
+    log_and_run "/tmp/chezmoi-install.log" sudo apt install -f -yq
+    if [[ $? -ne 0 ]]; then
+        log_err "[APT] Failed to install $package_name"
+        return 1
+    fi
+}
+
+export DEBIAN_FRONTEND=noninteractive
+
+log "[APT] Updating package list"
+log_and_run "/tmp/chezmoi-install.log" sudo apt update -yq
+log "[APT] Upgrading packages"
+log_and_run "/tmp/chezmoi-install.log" sudo apt upgrade -yq
+
+# Iterate over PACKAGES_KEYS and install the corresponding packages
+for key in "${PACKAGES_KEYS[@]}"; do
+    declare -n packages="$key"
+    if [ ${#packages[@]} -ne 0 ]; then
+        log "[APT] Installing packages from $key: ${packages[@]}"
+        apt_install "${packages[@]}"
+    fi
+done
+
+for ((i=0; i<${#PACKAGES_CUSTOM[@]}; i+=2)); do
+    custom_install "${PACKAGES_CUSTOM[i]}" "${PACKAGES_CUSTOM[i+1]}"
+done

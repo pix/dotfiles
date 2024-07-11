@@ -1,0 +1,45 @@
+# .chezmoi.yaml.tmpl
+
+merge:
+  command: meld
+
+data:
+  config:
+    ephemeral: {{ promptBoolOnce . "config.ephemeral" "Ephemeral config" false }}
+    enabled:
+      devel: {{ promptBoolOnce . "config.enabled.devel" "Enable devel tool" false }}
+      systemd: {{ promptBoolOnce . "config.enabled.systemd" "Enable systemd services" false }}
+      systemd_user: {{ promptBoolOnce . "config.enabled.systemd_user" "Manage systemd user services" false }}
+      docker: {{ promptBoolOnce . "config.enabled.docker" "Enable docker" false }}
+      binaries: {{ promptBoolOnce . "config.enabled.binaries" "Enable github downloaded binaries" false }}
+      work:
+        sectools: {{ promptBoolOnce . "config.enabled.work.sectools" "Enable pipx python pentesting tools?" false }}
+        seclist: {{ promptBoolOnce . "config.enabled.work.seclist" "Enable SecLists?" false }}
+        burp: {{ promptBoolOnce . "config.enabled.work.burp" "Enable Burp?" false }}
+      fonts: {{ promptBoolOnce . "config.enabled.fonts" "Enable fonts?" false }}
+
+  features:
+    devel: {{ dig "config" "enabled" "devel" false . }}
+    systemd: {{ dig "config" "enabled" "systemd" false . }}
+    systemd_user: {{ and (dig "config" "enabled" "systemd" false .) (dig "config" "enabled" "systemd_user" false .) }}
+    ephemeral: {{ dig "config" "ephemeral" false . }}
+    binaries: {{ dig "config" "enabled" "binaries" false . }}
+    tools:
+      pwning: {{ dig "config" "enabled" "work" "sectools" false . }}
+      burp: {{ dig "config" "enabled" "work" "burp" false . }}
+      seclist: {{ dig "config" "enabled" "work" "seclist" false . }}
+    docker:
+      binaries: {{ and (dig "config" "enabled" "docker" false .) (dig "config" "enabled" "binaries" false .) }}
+    fonts: {{ and (dig "config" "enabled" "fonts" false .) (not (dig "config" "ephemeral" false .)) }}
+
+  {{- /* implement templatable data support */ -}}
+  {{- $data := glob (joinPath .chezmoi.sourceDir ".chezmoitemplates/data/*.yaml.tmpl") -}}
+  {{- $ctx := deepCopy . -}}
+  {{- $out := dict -}}
+  {{- range $file := $data -}}
+  {{- $y := fromYaml (includeTemplate $file $ctx) -}}
+  {{- $out := merge $out $y -}}
+  {{- end -}}
+  {{- if hasKey $out "data" }}
+  {{ $out.data | toYaml | nindent 2 }}
+  {{- end }}

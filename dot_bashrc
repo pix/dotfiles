@@ -1,0 +1,21 @@
+#
+# ~/.bashrc
+#
+
+# If not running interactively, don't do anything
+[[ $- != *i* ]] && return
+
+alias ls='ls --color=auto'
+alias grep='grep --color=auto'
+PS1='[\u@\h \W]\$ '
+
+# Customize to your needs...
+if [[ -d ~/.config/shells/rc ]]; then
+  for file in ~/.config/shells/rc/*.sh; do
+    if [[ -f $file ]]; then
+      source $file
+    fi
+  done
+fi
+
+export PATH=$HOME/.local/bin:$PATH

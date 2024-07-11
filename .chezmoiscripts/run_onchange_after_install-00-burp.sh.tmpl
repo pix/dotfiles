@@ -1,0 +1,16 @@
+{{ template "bash-script" . }}
+
+# config: {{ .config.burp | toJson | sha256sum }}
+{{- if stat (joinPath .chezmoi.homeDir ".BurpSuite/UserConfigPro.json") }}
+# config_file: {{ include (joinPath .chezmoi.homeDir ".BurpSuite" "UserConfigPro.json") | sha256sum }}
+{{ end }}
+{{- if stat (joinPath .chezmoi.homeDir ".bin/burp") }}
+# bin_file: {{ include (joinPath .chezmoi.homeDir ".bin/burp") | sha256sum }}
+{{- end }}
+
+{{- if .features.tools.burp }}
+log "[BURP] Downloading burp"
+~/.bin/burp --download-only
+~/.bin/burp --patch
+exit 0
+{{- end -}}

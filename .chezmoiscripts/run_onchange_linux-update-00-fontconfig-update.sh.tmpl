@@ -1,0 +1,18 @@
+{{ template "bash-script" . }}
+{{ if .features.fonts -}}
+
+# {{ includeTemplate "dot_config/fontconfig/fonts.conf.tmpl" . | sha256sum }}
+
+if ! command -v fc-cache &> /dev/null; then
+    log_error '[fonts] fc-cache not found'
+    exit 1
+fi
+
+log '[fonts] updating font cache'
+
+
+if ! OUT=$(fc-cache --force --verbose 2>&1); then
+    echo "$OUT"
+    exit 1
+fi
+{{- end }}

@@ -1,0 +1,167 @@
+{{ if (dig "features" "binaries" false .) }}
+
+# doc:command:age:shell:A simple, modern and secure encryption tool with small explicit keys, no config options, and UNIX-style composability
+.local/bin/age:
+  type: archive-file
+  url: {{ gitHubLatestReleaseAssetURL "FiloSottile/age" (printf "age-*-%s-%s.tar.gz" .chezmoi.os .chezmoi.arch) | quote }}
+  executable: true
+  path: age/age
+
+# doc:command:age-keygen:shell:Generate age keys
+.local/bin/age-keygen:
+  type: archive-file
+  url: {{ gitHubLatestReleaseAssetURL "FiloSottile/age" (printf "age-*-%s-%s.tar.gz" .chezmoi.os .chezmoi.arch) | quote }}
+  executable: true
+  path: age/age-keygen
+
+# doc:command:tldr:shell:Simplified and community-driven man pages
+.local/bin/tldr:
+  {{- $arch := includeTemplate "get-arch" (list . (dict 
+    "386" "i686" 
+    "amd64" "x86_64"
+  )) }}
+  type: "file"
+  url: {{ gitHubLatestReleaseAssetURL "dbrgn/tealdeer" (printf "tealdeer-%s-%s-musl" .chezmoi.os $arch) | quote }}
+  executable: true
+
+# doc:command:gdu:shell:Disk usage analyzer with console interface
+.local/bin/gdu:
+  type: archive-file
+  url: {{ gitHubLatestReleaseAssetURL "dundee/gdu" (printf "gdu_%s_%s.tgz" .chezmoi.os .chezmoi.arch) | quote }}
+  executable: true
+  path: gdu_linux_amd64
+
+# doc:command:dasel:shell:Query and modify data structures from the command line (yq/jq alternative)
+.local/bin/dasel:
+  type: file
+  url: {{ gitHubLatestReleaseAssetURL "TomWright/dasel" (printf "dasel_%s_%s" .chezmoi.os .chezmoi.arch) | quote }}
+  executable: true
+
+# doc:command:btop:shell:Resource monitor that shows usage and stats for processor, memory, disks, network and processes
+.local/bin/btop:
+  {{- $arch := includeTemplate "get-arch" (list . (dict 
+    "386" "i686" 
+    "amd64" "x86_64"
+  )) }}
+  type: "archive-file"
+  url: {{ gitHubLatestReleaseAssetURL "aristocratos/btop" (printf "btop-%s-%s-musl.tbz" $arch .chezmoi.os) | quote }}
+  executable: true
+  stripComponents: 1
+  path: btop/bin/btop
+
+# doc:command:bat:shell:Syntax highlighting for cat\n  https://github.com/sharkdp/bat
+.local/bin/bat:
+  {{- $arch := includeTemplate "get-arch" (list . (dict 
+    "386" "i686" 
+    "amd64" "x86_64" 
+    "arm" "arm" 
+    "arm64" "aarch64"
+  )) }}
+  type: "archive-file"
+  url: {{ gitHubLatestReleaseAssetURL "sharkdp/bat" (printf "bat-*-%s-unknown-%s-gnu.tar.gz" $arch .chezmoi.os) | quote }}
+  executable: true
+  stripComponents: 1
+  path: bat
+
+# doc:command:eza:shell:Community-driven, ls replacement with advanced features
+.local/bin/eza:
+  {{- $arch := includeTemplate "get-arch" (list . (dict 
+    "386" "i686" 
+    "amd64" "x86_64" 
+    "arm" "arm" 
+    "arm64" "aarch64"
+  )) }}
+  url: {{ gitHubLatestReleaseAssetURL "eza-community/eza" (printf "eza_%s-unknown-%s-gnu.tar.gz" $arch .chezmoi.os) | quote }}
+  type: "archive-file"
+  executable: true
+  stripComponents: 1
+  path: eza
+
+# doc:command:fd:shell:Simple, fast and user-friendly alternative to find
+.local/bin/fd:
+  {{- $arch := includeTemplate "get-arch" (list . (dict 
+    "386" "i686" 
+    "amd64" "x86_64" 
+    "arm" "arm" 
+    "arm64" "aarch64"
+  )) }}
+  url: {{ gitHubLatestReleaseAssetURL "sharkdp/fd" (printf "fd-*-%s-unknown-%s-gnu.tar.gz" $arch .chezmoi.os) | quote }}
+  type: archive-file
+  executable: true
+  stripComponents: 1
+  path: fd
+
+# doc:command:rg:shell:ripgrep combines the usability of The Silver Searcher with the raw speed of grep
+.local/bin/rg:
+  type: "archive-file"
+  {{- $arch := includeTemplate "get-arch" (list . (dict 
+    "386" "i686" 
+    "amd64" "x86_64" 
+    "arm" "arm" 
+    "arm64" "aarch64"
+  )) }}
+  url: {{ gitHubLatestReleaseAssetURL "BurntSushi/ripgrep" (printf "ripgrep-*-%s-unknown-%s-musl.tar.gz" $arch .chezmoi.os) | quote }}
+  executable: true
+  stripComponents: 1
+  path: rg
+
+# doc:command:lazydocker:shell:Simple terminal UI for interacting with Docker
+.local/bin/lazydocker:
+  type: "archive-file"
+  {{- $arch := includeTemplate "get-arch" (list . (dict 
+    "386" "i686" 
+    "amd64" "x86_64" 
+    "arm" "arm" 
+    "arm64" "aarch64"
+  )) }}
+  url: {{ gitHubLatestReleaseAssetURL "jesseduffield/lazydocker" (printf "lazydocker_*_Linux_%s.tar.gz" $arch) | quote }}
+  executable: true
+  path: lazydocker
+
+# doc:command:lazysql:shell:Simple terminal UI for interacting with SQL databases
+.local/bin/lazysql:
+  type: "archive-file"
+  {{- $arch := includeTemplate "get-arch" (list . (dict 
+    "386" "i686" 
+    "amd64" "x86_64" 
+    "arm" "arm" 
+    "arm64" "aarch64"
+  )) }}
+  url: {{ gitHubLatestReleaseAssetURL "jorgerojas26/lazysql" (printf "lazysql_Linux_%s.tar.gz" $arch) | quote }}
+  executable: true
+  path: lazysql
+
+# doc:command:glow:shell:Render markdown on the terminal
+.local/bin/glow:
+  type: "archive-file"
+  {{- $arch := includeTemplate "get-arch" (list . (dict 
+    "386" "i686" 
+    "amd64" "x86_64" 
+    "arm" "arm" 
+    "arm64" "aarch64"
+  )) }}
+  url: {{ gitHubLatestReleaseAssetURL "charmbracelet/glow" (printf "glow_Linux_%s.tar.gz" $arch) | quote }}
+  executable: true
+  path: glow
+
+# doc:command:fzf:shell:Command-line fuzzy finder
+.local/bin/fzf:
+  type: "archive-file"
+  url: {{ gitHubLatestReleaseAssetURL "junegunn/fzf" (printf "fzf-*-%s_%s.tar.gz" .chezmoi.os .chezmoi.arch) | quote }}
+  executable: true
+  path: fzf
+
+# doc:command:yazi:shell:Yazi is a simple tui file manager written in rust\n  https://github.com/sxyazi/yazi
+.local/bin/yazi:
+  type: "archive-file"
+  {{- $arch := includeTemplate "get-arch" (list . (dict 
+    "386" "i686" 
+    "amd64" "x86_64" 
+    "arm" "arm" 
+    "arm64" "aarch64"
+  )) }}
+  url: {{ gitHubLatestReleaseAssetURL "sxyazi/yazi" (printf "yazi-%s-unknown-%s-gnu.zip" $arch .chezmoi.os ) | quote }}
+  executable: true
+  stripComponents: 1
+  path: yazi
+{{ end }}

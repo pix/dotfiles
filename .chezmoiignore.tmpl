@@ -1,0 +1,41 @@
+/README.md
+/README.md.tmpl
+/Makefile
+
+# .features.tools.seclist: {{ .features.tools.seclist }}
+{{ if not .features.tools.seclist }}
+work/data/seclists
+{{ end }}
+
+# .features.tools.burp: {{ .features.tools.burp }}
+{{ if not .features.tools.burp }}
+.bin/burp
+.BurpSuite
+.local/burp
+{{ end }}
+
+# .features.fonts: {{ .features.fonts }}
+{{ if not .features.fonts }}
+.local/share/fonts
+.config/fontconfig
+{{ end }}
+
+# if not kali, ignore .hushlogin
+{{ if not (eq .chezmoi.osRelease.id "kali") }}
+.hushlogin
+{{ end }}
+
+# .features.ephemeral: {{ .features.ephemeral }}
+{{ if .features.ephemeral }}
+!.config/direnv
+!.config/nvim
+!.config/python
+!.config/shells
+!.config/zsh
+.local/share/fonts/*
+.config/*
+.bin/waybar-*
+.icons
+.gtkrc-2.0
+.mozilla
+{{ end }}

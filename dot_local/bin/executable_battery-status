@@ -1,0 +1,4 @@
+#!/bin/bash
+# doc:command:battery-status:shell:Print the battery status of your laptop
+
+upower -i $(upower -e | grep 'BAT') | grep -E "(state|to full|percentage):" | yq -r '.state + " - " + .percentage'

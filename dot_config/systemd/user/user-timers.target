@@ -1,0 +1,6 @@
+[Unit]
+Description=User level timers target
+AllowIsolate=true
+
+[Install]
+WantedBy=user-session.target

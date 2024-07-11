@@ -1,0 +1,45 @@
+{{- $themes := list .gui.theme.gtk_theme }}
+{{- $theme_name := .gui.theme.gtk_theme }}
+{{- $found := false }}
+{{- if dig "gui" "theme" "gtk2_theme" false . }}
+{{- $themes = prepend $themes .gui.theme.gtk2_theme }}
+{{- $theme_name := .gui.theme.gtk2_theme }}
+{{- end }}
+{{- range $theme := $themes }}
+  {{- $global := printf "/usr/share/themes/%s/gtk-2.0/gtkrc" $theme }}
+  {{- $user := printf "%s/.themes/%s/gtk-2.0/gtkrc" $.chezmoi.homeDir $theme }}
+  {{- $userLocal := printf "%s/.local/share/themes/%s/gtk-2.0/gtkrc" $.chezmoi.homeDir $theme }}
+  {{- $locations := list $userLocal $user $global }}
+  {{- range $location := $locations }}
+# looking up {{ $location }}: {{ if stat $location }}present{{ else }}absent{{ end }}
+    {{- if stat $location }}
+    {{- if not $found }}
+include "{{ $location }}"
+    {{- end }}
+    {{- $found = true }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+
+style "user-font" {
+        font_name = "{{ .gui.theme.gtk_font }}"
+}
+
+widget_class "*" style "user-font"
+
+
+gtk-theme-name="{{ $theme_name }}"
+gtk-icon-theme-name="{{ .gui.theme.icon }}"
+gtk-font-name="{{ .gui.theme.gtk_font }}"
+gtk-cursor-theme-name="{{ .gui.theme.gtk_cursor_theme }}"
+gtk-cursor-theme-size=24
+gtk-toolbar-style=GTK_TOOLBAR_BOTH
+gtk-toolbar-icon-size=GTK_ICON_SIZE_LARGE_TOOLBAR
+gtk-button-images=1
+gtk-menu-images=1
+gtk-enable-event-sounds=1
+gtk-enable-input-feedback-sounds=0
+gtk-xft-antialias=1
+gtk-xft-hinting=1
+gtk-xft-hintstyle="hintfull"
+gtk-xft-rgba="rgb"

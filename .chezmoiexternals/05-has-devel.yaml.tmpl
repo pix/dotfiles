@@ -1,0 +1,23 @@
+{{ if (dig "features" "devel" false .) }}
+# doc:command:mise:devel:Use mise to manage your development environments (toolchains, SDKs, etc.)
+.local/bin/mise:
+  type: archive-file
+  url: "https://github.com/jdx/mise/releases/latest/download/mise-{{ (gitHubLatestRelease "jdx/mise").TagName }}-{{ .chezmoi.os }}-{{ if eq .chezmoi.arch "amd64" }}x64{{ else }}{{ .chezmoi.arch }}{{ end }}.tar.gz"
+  path: mise/bin/mise
+  executable: true
+  refreshPeriod: 168h
+
+# doc:command:delta:devel:A syntax-highlighting pager for git, diff, grep, and blame output
+.local/bin/delta:
+  {{- $arch := includeTemplate "get-arch" (list . (dict 
+    "386" "i686" 
+    "amd64" "x86_64" 
+    "arm" "arm" 
+    "arm64" "aarch64"
+  )) }}
+  type: archive-file
+  url: {{ gitHubLatestReleaseAssetURL "dandavison/delta" (printf "delta-*-%s-unknown-linux-musl.tar.gz" $arch) | quote }}
+  executable: true
+  stripComponents: 1
+  path: delta
+{{ end }}

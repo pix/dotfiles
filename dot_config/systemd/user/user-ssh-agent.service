@@ -1,0 +1,18 @@
+[Unit]
+Description=SSH key agent
+# You can add After=network.target if network connectivity is required for any SSH operations
+After=network-online.target
+Wants=network-online.target
+Wants=environment.target
+Before=environment.target
+IgnoreOnIsolate=true
+
+[Service]
+Type=simple
+Environment="SSH_AUTH_SOCK=/run/user/%U/ssh-agent.socket"
+ExecStartPre=/bin/sh -c '/bin/systemctl --user set-environment SSH_AUTH_SOCK=/run/user/%U/ssh-agent.socket'
+ExecStart=/usr/bin/ssh-agent -D -a $SSH_AUTH_SOCK
+Restart=always
+
+[Install]
+WantedBy=user-session-once.target

@@ -1,0 +1,14 @@
+#!/bin/sh
+
+# doc:command:code-wait:vscode:Run Visual Studio Code with the specified files and wait for it to close
+CODE=$(command -v code)
+CODE_OSS=$(command -v code-oss)
+
+if [ -n "$CODE" ]; then
+  exec "$CODE" -w "$@"
+elif [ -n "$CODE_OSS" ]; then
+  exec "$CODE_OSS" -w "$@"
+else
+  echo "code or code-oss not found in PATH"
+  exit 1
+fi

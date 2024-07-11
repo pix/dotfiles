@@ -1,0 +1,15 @@
+[Unit]
+Description=pyprland
+Documentation=man:pypr
+PartOf=user-session.target
+
+[Service]
+Type=simple
+Restart=always
+# Ensure that the needed environment variables are set
+ExecStartPre=/bin/test -n "${HYPRLAND_INSTANCE_SIGNATURE}" -a -n "${XDG_RUNTIME_DIR}"
+ExecStartPre=/bin/rm -f ${XDG_RUNTIME_DIR}/hypr/${HYPRLAND_INSTANCE_SIGNATURE}/.pyprland.sock
+ExecStart=/sbin/pypr
+
+[Install]
+WantedBy=user-session.target

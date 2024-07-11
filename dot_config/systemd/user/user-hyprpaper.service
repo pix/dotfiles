@@ -1,0 +1,12 @@
+[Unit]
+Description=hyprpaper daemon
+Documentation=man:hyprpaper
+PartOf=user-session.target
+
+[Service]
+Type=simple
+Restart=always
+ExecStart=/usr/bin/hyprpaper
+
+[Install]
+WantedBy=user-session.target

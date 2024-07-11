@@ -1,0 +1,6 @@
+{{- if lookPath "direnv" }}
+# doc:command:direnv:shell:Load environment variables from .envrc files, use `direnv allow` to allow a .envrc file to be loaded.
+if command -v direnv &>/dev/null; then
+  eval "$(direnv hook zsh)"
+fi
+{{- end }}

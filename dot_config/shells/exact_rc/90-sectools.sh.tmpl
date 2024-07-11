@@ -1,0 +1,8 @@
+{{- if .features.tools.pwning -}}
+
+# doc:command:uber-apk-signer:pwning:Sign and align APK files (Android application packages) with the Uber Apk Signer tool
+function uber-apk-signer() {
+  java -jar ~/.local/java/uber-apk-signer.jar "$@"
+}
+
+{{- end -}}

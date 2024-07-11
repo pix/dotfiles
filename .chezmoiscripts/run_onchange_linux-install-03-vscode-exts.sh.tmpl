@@ -1,0 +1,67 @@
+{{ template "bash-script" . }}
+
+{{ if not .features.ephemeral }}
+
+{{ if dig "packages" "vscode_extensions" false . -}}
+{{ template "package-list-to-array" .packages.vscode_extensions }}
+
+list_missing_extensions() {
+	local installed
+	mapfile -t installed < <(code --list-extensions)
+
+	for ext in "${PACKAGES[@]}"; do
+		local find="\<${ext}\>"
+		if ! [[ ${installed[*]} =~ $find ]]; then
+			echo "$ext"
+		fi
+	done
+}
+
+install_missing_extensions() {
+	local IFS=$'\n'
+	local missing
+	mapfile -t missing < <(list_missing_extensions)
+
+	for ext in "${missing[@]}"; do
+        log_info "[VSCode] Installing missing $ext"
+		if ! code --install-extension "$ext" &> /dev/null; then
+            log_error "[VSCode] Failed to install $ext"
+        fi
+	done
+}
+
+install_extensions() {
+	local IFS=$'\n'
+	local missing
+
+	for ext in "${PACKAGES[@]}"; do
+        log_info "[VSCode] Installing $ext"
+		if ! code --install-extension "$ext" &> /dev/null; then
+            log_err "[VSCode] Failed to install $ext"
+        fi
+	done
+}
+
+log_unknown_extensions() {
+	local installed
+	mapfile -t installed < <(code --list-extensions)
+
+	for ext in "${installed[@]}"; do
+		local find="\<${ext}\>"
+		if ! [[ ${PACKAGES[*]} =~ $find ]]; then
+			log_err "[VSCode] Unknown extension $ext"
+		fi
+	done
+}
+
+if ! command -v code &> /dev/null; then
+    log_info '[VSCode] code is not installed, skipping'
+    exit 1
+fi
+
+install_missing_extensions
+log_unknown_extensions
+
+{{- end }}
+
+{{- end }}

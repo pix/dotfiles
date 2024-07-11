@@ -1,0 +1,358 @@
+{
+    "height": 16, // Waybar height (to be removed for auto height)
+
+    "modules-left": [
+        "hyprland/workspaces",
+        "hyprland/window"
+    ],
+
+    "modules-center": [],
+
+    "modules-right": [
+        "group/music",
+        "custom/hyprpip",
+        "custom/weather",
+        "idle_inhibitor",
+        "group/hardware",
+        "network#bw",
+        "group/netinfo",
+        "pulseaudio",
+        "backlight",
+        //"keyboard-state",
+        "battery",
+        "battery#bat2",
+        "custom/notification",
+        "tray",
+        "clock"
+    ],
+
+    "group/music": {
+        "orientation": "inherit",
+        "drawer": {
+            "transition-duration": 500,
+            "children-class": "not-power",
+            "transition-left-to-right": false,
+        },
+        "modules": [
+            "mpris#icon",
+            "mpris",
+        ]
+    },
+    "group/hardware": {
+        "orientation": "inherit",
+        "drawer": {
+            "transition-duration": 500,
+            "children-class": "not-power",
+            "transition-left-to-right": false,
+        },
+        "modules": [
+            "cpu",
+            "custom/docker",
+            "custom/ufw",
+            "memory",
+            "disk"
+        ]
+    },
+    "group/netinfo": {
+        "orientation": "inherit",
+        "drawer": {
+            "transition-duration": 500,
+            "children-class": "not-power",
+            "transition-left-to-right": false,
+        },
+        "modules": [
+            "custom/network",
+            "network",
+        ]
+    },
+
+    "custom/docker": {
+        // "exec": "count=$(docker ps -q | wc -l); [[ $count -gt 0 ]] && echo $count",
+        "exec": "waybar-docker",
+        "exec-if": "waybar-docker --has-containers",
+        "return-type": "json",
+        "format": " {}",
+        "interval": 60,
+        "on-click": "hyprctl dispatch togglespecialworkspace lazydocker"
+    },
+    "custom/ufw": {
+        // "exec": "count=$(docker ps -q | wc -l); [[ $count -gt 0 ]] && echo $count",
+        "exec": "~/.bin/waybar-ufw",
+        "exec-if": "pgrep NetworkManager",
+        "return-type": "json",
+        "format": " {}",
+        "interval": 60,
+    },
+    "custom/notification": {
+        "tooltip": false,
+        "format": "{icon}",
+        "format-icons": {
+            "notification": "<span foreground='red'><sup></sup></span>",
+            "none": "",
+            "dnd-notification": "<span foreground='red'><sup></sup></span>",
+            "dnd-none": "",
+            "inhibited-notification": "<span foreground='red'><sup></sup></span>",
+            "inhibited-none": "",
+            "dnd-inhibited-notification": "<span foreground='red'><sup></sup></span>",
+            "dnd-inhibited-none": ""
+        },
+        "return-type": "json",
+        "exec-if": "which swaync-client",
+        "exec": "swaync-client -swb",
+        "on-click": "swaync-client -t -sw",
+        "on-click-right": "swaync-client -d -sw",
+        "escape": true
+    },
+    "custom/spotify": {
+        "exec": "/usr/bin/python3 ~/.bin/media.py 2> /dev/null",
+        "format": "{} {icon}",
+        "format-icons": {
+            "spotify": "",
+            "chrome": "",
+            "firefox": "",
+            "default": "🎜"
+        },
+        "return-type": "json",
+        "on-click": "playerctl play-pause",
+        "on-scroll-up": "playerctl next",
+        "on-scroll-down": "playerctl previous"
+    },
+    "custom/network": {
+        "exec": "waybar-net",
+        "format": "{}",
+        "return-type": "json",
+        "interval": 60,
+        "on-click": "waybar-net --ipv4 | wl-copy",
+        "on-click-right": "waybar-net --ipv6 | wl-copy",
+        "on-click-middle": "waybar-net --text | wl-copy",
+    },
+    "custom/weather": {
+        "exec": "waybar-weather",
+        "format": "{}",
+        "return-type": "json",
+        "interval": 600,
+        "on-click": "waybar-weather --text | wl-copy",
+    },
+    "custom/hyprpip": {
+        "exec": "hyprpip -waybar",
+        "format": "{}",
+        "return-type": "json",
+        // "signal": 1,
+        "on-click": "systemctl --user stop user-hyprpip; pkill -SIGRTMIN+2 hyprpip",
+        "on-click-right": "systemctl --user start user-hyprpip; pkill -SIGRTMIN+3 hyprpip",
+    },
+    "keyboard-state": {
+        "numlock": true,
+        "rewrite": {
+            "(.*) — Mozilla Firefox": "🌎 $1",
+            "(.*) - fish": "> [$1]"
+        },
+        "capslock": true,
+        "format": "{name} {icon}",
+        "format-icons": {
+            "locked": "",
+            "unlocked": ""
+        }
+    },
+    "hyprland/window": {
+        "icon": true,
+        "icon-size": 16,
+        "rewrite": {
+            "(.*) — Mozilla Firefox": "$1"
+        }
+    },
+    "mpris": {
+        "format": "{dynamic}",
+        "format-paused": "{dynamic}",
+        "player-icons": {
+            "spotify": "",
+            "chrome": "",
+            "firefox": "",
+            "default": "🎜",
+            "com": ""
+        },
+        "status-icons": {
+            "paused": "",
+            "playing": "",
+        },
+        //"ignored-players": ["firefox"]
+    },
+    "mpris#icon": {
+        "format": "{player_icon}",
+        "format-paused": "{status_icon}",
+        "player-icons": {
+            "spotify": "",
+            "chrome": "",
+            "firefox": "",
+            "default": "🎜",
+            "com": ""
+        },
+        "status-icons": {
+            "paused": "",
+            "playing": "",
+        },
+        //"ignored-players": ["firefox"],
+        "tooltip": true
+    },
+    "mpd": {
+        //        "format": "{stateIcon} {consumeIcon}{randomIcon}{repeatIcon}{singleIcon}{artist} - {album} - {title} ({elapsedTime:%M:%S}/{totalTime:%M:%S}) ⸨{songPosition}|{queueLength}⸩ {volume}% ",
+        "format": "  {title} - {artist} {stateIcon} [{elapsedTime:%M:%S}/{totalTime:%M:%S}] {consumeIcon}{randomIcon}{repeatIcon}{singleIcon}[{songPosition}/{queueLength}] [{volume}%]",
+        "format-disconnected": " Disconnected",
+        "format-stopped": " {consumeIcon}{randomIcon}{repeatIcon}{singleIcon}Stopped",
+        "unknown-tag": "N/A",
+        "interval": 2,
+        "consume-icons": {
+            "on": " "
+        },
+        "random-icons": {
+            //            "off": "<span color=\"#f53c3c\"></span> ",
+            "on": " "
+        },
+        "repeat-icons": {
+            "on": " "
+        },
+        "single-icons": {
+            "on": "1 "
+        },
+        "state-icons": {
+            "paused": "",
+            "playing": ""
+        },
+        "tooltip-format": "MPD (connected)",
+        "tooltip-format-disconnected": "MPD (disconnected)",
+        "on-click": "mpc toggle",
+        "on-click-right": "foot -a ncmpcpp ncmpcpp",
+        "on-scroll-up": "mpc volume +2",
+        "on-scroll-down": "mpc volume -2"
+    },
+    "idle_inhibitor": {
+        "format": "{icon}",
+        "format-icons": {
+            "activated": "",
+            "deactivated": ""
+        }
+    },
+    "tray": {
+        "icon-size": 16,
+        "spacing": 10
+    },
+    "clock": {
+        // "timezone": "America/New_York",
+        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+        //"format-alt": "{:%Y-%m-%d}",
+        "format": "{:%Y-%m-%d %H:%M}",
+        "on-click-right": "systemctl --user restart user-waybar"
+    },
+    "cpu": {
+        "format": " {usage}%",
+        "on-click-middle": "hyprctl dispatch togglespecialworkspace htop",
+        "on-click-right": "hyprctl dispatch togglespecialworkspace htop",
+        "on-click": "hyprctl dispatch togglespecialworkspace htop"
+        //        "tooltip": false
+    },
+    "memory": {
+        "format": " {}%",
+        "on-click-middle": "hyprctl dispatch togglespecialworkspace htop",
+        "on-click-right": "hyprctl dispatch togglespecialworkspace htop",
+        "on-click": "hyprctl dispatch togglespecialworkspace htop"
+    },
+    "disk": {
+        "format": " {}%",
+        "on-click-middle": "hyprctl dispatch togglespecialworkspace pcmanfm",
+        "on-click-right": "hyprctl dispatch togglespecialworkspace pcmanfm",
+        "on-click": "hyprctl dispatch togglespecialworkspace pcmanfm"
+    },
+    "temperature": {
+        "thermal-zone": 2,
+        "hwmon-path": "/sys/class/hwmon/hwmon1/temp1_input",
+        "critical-threshold": 80,
+        "format-critical": "{icon} {temperatureC}°C",
+        "format": "{icon} {temperatureC}°C",
+        "format-icons": [
+            "",
+            "",
+            ""
+        ]
+    },
+    "backlight": {
+        // "device": "acpi_video1",
+        "format": "{icon} {percent}%",
+        // 4 steps of 25% each
+        "format-icons": [
+            "",
+            "",
+            ""
+        ],
+        "on-scroll-up": "brightnessctl set +1%",
+        "on-scroll-down": "brightnessctl set 1%-; if [ $(brightnessctl get) -lt 20000 ]; then brightnessctl set 20000; fi"
+    },
+    "battery": {
+        "states": {
+            // "good": 95,
+            "warning": 30,
+            "critical": 15
+        },
+        "format": "{icon} {capacity}%",
+        "format-charging": " {capacity}%",
+        "format-plugged": " {capacity}%",
+        "format-alt": "{icon} {time}",
+        // "format-good": "", // An empty format will hide the module
+        // "format-full": "",
+        "format-icons": [
+            "",
+            "",
+            "",
+            "",
+            ""
+        ],
+        "on-click": "gnome-power-statistics"
+    },
+    "battery#bat2": {
+        "bat": "BAT2"
+    },
+    "network": {
+        // "interface": "wlp2*", // (Optional) To force the use of this interface
+        "format-wifi": " {ipaddr}/{cidr} ({signalStrength}%) ",
+        "format-ethernet": " {ipaddr}/{cidr}",
+        "format-linked": " {ifname} (No IP)",
+        "format-disconnected": " {ifname}",
+        "tooltip-format": " {bandwidthUpBytes}  {bandwidthDownBytes}\n{ipaddr}/{cidr}\nvia {gwaddr}",
+        "tooltip-format-wifi": " {bandwidthUpBytes}  {bandwidthDownBytes}\n{ipaddr}/{cidr}\nvia {gwaddr}\n{essid} ({signalStrength}%) ",
+    },
+    "network#bw": {
+        // "interface": "wlp2*", // (Optional) To force the use of this interface
+        "format": " {bandwidthUpBytes}  {bandwidthDownBytes}",
+        "tooltip-format": " {bandwidthUpBytes}  {bandwidthDownBytes}\n{ipaddr}/{cidr}\nvia {gwaddr}",
+        "tooltip-format-wifi": " {bandwidthUpBytes}  {bandwidthDownBytes}\n{ipaddr}/{cidr}\nvia {gwaddr}\n{essid} ({signalStrength}%) ",
+    },
+    "pulseaudio": {
+        "scroll-step": 5, // %, can be a float
+        "format": "{icon} {volume}% {format_source}",
+        "format-bluetooth": " {icon} {volume}% {format_source}",
+        "format-bluetooth-muted": "  {icon} {format_source}",
+        "format-muted": "  {format_source}",
+        "format-source": " {volume}%",
+        "format-source-muted": "",
+        "format-icons": {
+            //            "headphone": "",
+            //            "hands-free": "",
+            //            "headset": "",
+            //            "phone": "",
+            //            "portable": "",
+            //            "car": "",
+            "default": [
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                ""
+            ]
+        },
+        "on-click": "hyprctl dispatch togglespecialworkspace pavucontrol; pavucontrol",
+        "on-click-middle": "pactl set-source-mute @DEFAULT_SOURCE@ toggle",
+        "on-click-right": "pactl set-sink-mute @DEFAULT_SINK@ toggle"
+    },
+}

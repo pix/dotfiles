@@ -1,0 +1,151 @@
+#!/usr/bin/env python3
+# doc:command:dotfiles-doc:misc:Search and display doc tags in chezmoi managed files
+import subprocess
+import re
+import os
+import json
+import sys
+from collections import defaultdict
+
+try:
+    from termcolor import colored
+except ImportError:
+    def colored(text, color):
+        color_codes = {
+            'red': '\033[91m',     'green': '\033[92m',
+            'yellow': '\033[93m',  'blue': '\033[94m',
+            'magenta': '\033[95m', 'cyan': '\033[96m',
+            'white': '\033[97m',   'reset': '\033[0m'
+        }
+        return f"{color_codes.get(color, '')}{text}{color_codes.get('reset', '')}"
+
+pattern = re.compile(r"#\s*doc:(z?function|z?alias|z?binding|command):([^:]+):([^:]+):(.+)")
+cache_file_path = os.path.expanduser("~/.local/share/dotfiles-doc/cache.json")
+
+def get_managed_files():
+    result = subprocess.run(['chezmoi', 'managed'], stdout=subprocess.PIPE, text=True)
+    files = result.stdout.splitlines()
+    return files
+
+def search_files(files):
+    results = defaultdict(set)
+    for file in files:
+        try:
+            file = os.path.join(os.environ["HOME"], file)
+            if not os.path.isfile(file):
+                continue
+            with open(file, 'r', encoding='utf-8') as f:
+                for line in f:
+                    line = line.strip()
+                    if not line.startswith('# doc:'):
+                        continue
+                    match = pattern.search(line)
+                    if match:
+                        doc_type, name, tag, message = match.groups()
+                        message = message.replace("\\n", "\n")
+                        results[tag].add((doc_type, name, message))
+                    elif "# doc:" in line:
+                        print(f"Invalid doc tag: {line}")
+        except (UnicodeDecodeError, FileNotFoundError):
+            continue
+    return results
+
+def display_results(results, markdown=False):
+    icons = {
+        'command': '',
+        'function': '󰊕',
+        'alias': '',
+        'binding': '',
+        'zfunction': '󰬡 󰊕',
+        'zalias': '󰬡 ',
+        'zbinding': '󰬡 '
+    }
+    output = []
+
+    if markdown:
+        output.append("## Available commands and functions\n\n")
+        for tag in sorted(results):
+            output.append(f"\n### {tag.upper()}\n")
+            for doc_type, name, message in sorted(results[tag]):
+                if doc_type.startswith('z'):
+                    doc_type = doc_type[1:]
+                output.append(f"- **{doc_type.capitalize()}**: `{name}`")
+                lines = message.split('\n')
+                output.append(f"  - {lines[0]}")
+                if len(lines) > 1:
+                    output.append("")
+                    for line in lines[1:]:
+                        output.append(f"    >     {line}")
+    else:
+        for tag in sorted(results):
+            output.append(f"\n󰓹 {colored('=' * 4, 'red')} {colored(tag.upper(), 'yellow')} {colored('=' * (70 - len(tag)), 'red')}")
+            for doc_type, name, message in sorted(results[tag]):
+                icon = icons.get(doc_type, '')
+                if doc_type.startswith('z'):
+                    doc_type = doc_type[1:]
+                lines = message.split('\n')
+                indented_message = '\n    '.join(lines)
+                output.append(f"  {icon}  {colored(doc_type.capitalize(), 'cyan')}: {colored(name, 'green')}\n    {indented_message}")
+        output.append("")
+
+    return "\n".join(output)
+
+def load_cache():
+    try:
+        with open(cache_file_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        return {k: set(tuple(x) for x in v) for k, v in data.items()}
+    except (FileNotFoundError, json.JSONDecodeError):
+        return None
+
+def save_cache(data):
+    os.makedirs(os.path.dirname(cache_file_path), exist_ok=True)
+    data_to_save = {k: list(v) for k, v in data.items()}
+    with open(cache_file_path, 'w', encoding='utf-8') as f:
+        json.dump(data_to_save, f)
+
+def clear_cache():
+    try:
+        os.remove(cache_file_path)
+        print("Cache cleared.")
+    except FileNotFoundError:
+        print("No cache to clear.")
+
+def main():
+    import argparse
+    parser = argparse.ArgumentParser(description="Search and display doc tags.")
+    parser.add_argument('--markdown', action='store_true', help="Output in Markdown format")
+    parser.add_argument('--update-cache', action='store_true', help="Update the cache with current data")
+    parser.add_argument('--clear-cache', action='store_true', help="Clear the cache")
+    args = parser.parse_args()
+
+    if args.clear_cache:
+        clear_cache()
+        return
+
+    if not args.update_cache:
+        cache = load_cache()
+        if cache:
+            results = cache
+        else:
+            files = get_managed_files()
+            results = search_files(files)
+            save_cache(results)
+    else:
+        files = get_managed_files()
+        results = search_files(files)
+        save_cache(results)
+        print("Cache updated.")
+        return
+
+    output = display_results(results, markdown=args.markdown)
+
+    if sys.stdout.isatty():
+        p = subprocess.Popen(['less', '-r'], stdin=subprocess.PIPE)
+        p.communicate(input=output.encode('utf-8'))
+        p.stdin.close()
+    else:
+        print(output)
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,16 @@
+{
+	"window.titleBarStyle": "custom",
+	"github.copilot.enable": {
+		"*": true,
+		"plaintext": true,
+		"markdown": true,
+		"scminput": false
+	},
+	"editor.fontFamily": "FiraMono Nerd Font Propo",
+	"workbench.colorTheme": "Monokai Black Wal",
+	"editor.fontSize": 13,
+	"files.associations": {
+		"*.yaml.tmpl": "helm"
+	},
+	"git.useEditorAsCommitInput": false
+}

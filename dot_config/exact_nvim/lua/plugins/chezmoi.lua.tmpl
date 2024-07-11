@@ -1,0 +1,79 @@
+{{- define "render_string" -}}
+"{{ index . 0 }}",
+{{- end }}
+
+{{- define "render_key" -}}
+{{ index . 0 }} =
+{{- end }}
+
+{{- define "render_list" -}}
+{
+  {{- $value := index . 0 }}
+  {{- $indent := index . 1 }}
+  {{- $newIndent := add $indent 2 }}
+  {{- range $index, $item := $value }}
+  {{- if $index }}, {{- end }}
+  {{ "" | indent (int $newIndent) }}{{ template "render_type" (list $item $newIndent) }}
+  {{- end }}
+{{ indent (int $newIndent) "}," }}
+{{- end }}
+
+{{- define "render_map" -}}
+{
+  {{- $value := index . 0 }}
+  {{- $indent := index . 1 }}
+  {{- $newIndent := add $indent 2 }}
+  {{- range $key, $item := $value }}
+  {{ "" | indent (int $newIndent) }}
+  {{- template "render_key" (list $key 0) }} {{ template "render_type" (list $item $newIndent) }}
+  {{- end }}
+{{ indent (int $newIndent) "}," }}
+{{- end }}
+
+{{- define "render_default" -}}
+{{ index . 0 }},
+{{- end }}
+
+{{- define "render_null" -}}
+{},
+{{- end }}
+
+{{- define "render_type" -}}
+{{- $value := index . 0 }}
+{{- $indent := index . 1 }}
+{{- $type := printf "%T" $value -}}
+{{- if eq $type "string" -}}
+  {{ template "render_string" (list $value $indent) }}
+{{- else if eq $type "[]interface {}" -}}
+  {{ template "render_list" (list $value $indent) }}
+{{- else if eq $type "map[string]interface {}" -}}
+  {{ template "render_map" (list $value $indent) }}
+{{- else if eq $type "<nil>" -}}
+  {{ template "render_null" (list $value $indent) }}
+{{- else -}}
+  {{ template "render_default" (list $value $indent) }}
+{{- end }}
+{{- end }}
+{{- define "render_plugins" -}}
+{{ .dotfiles.managedMessage | comment "-- " }}
+return {
+  {{- range $pkg, $config := .packages.lazyvim_extensions }}
+  {
+    "{{$pkg}}",
+    {{- $initialIndent := 4 -}}
+    {{- range $key, $value := $config }}
+    {{- if (eq $key "init") }}
+    init = function()
+      {{- $value | trim | nindent 6 }}
+    end,
+    {{- else if (eq $key "config") }}
+    {{- else }}
+    {{ template "render_key" (list $key 0) }} {{ template "render_type" (list $value (add $initialIndent -2)) }}
+    {{- end }}
+
+    {{- end }}
+  },
+  {{- end }}
+}
+{{- end }}
+{{- template "render_plugins" . }}

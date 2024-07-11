@@ -1,0 +1,13 @@
+[Unit]
+Description=Connect your computer to your smartphone or tablet (applet)
+PartOf=user-session.target
+Requires=user-kdeconnectd.service
+
+[Service]
+Type=simple
+Restart=always
+ExecStart=/usr/bin/kdeconnect-indicator
+ExecStop=/usr/bin/kquitapp5 kdeconnect-indicator
+
+[Install]
+WantedBy=user-session.target

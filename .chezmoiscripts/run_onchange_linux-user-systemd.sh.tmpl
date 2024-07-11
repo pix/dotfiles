@@ -1,0 +1,30 @@
+{{ template "bash-script" . }}
+
+# Manage systemd system services
+{{ if .features.systemd }}
+{{ if (dig "config" "systemd" "system" false .) }}
+{{ range $system := .config.systemd.system }}
+if service_exists {{ $system | quote }}; then
+    log '[systemd] enabling '{{ $system | quote }}
+    sudo systemctl enable {{ $system | quote }}
+fi
+{{ end }}
+{{ end }}
+{{ end }}
+
+# Manage systemd user services
+{{ if .features.systemd_user }}
+{{ if (dig "config" "systemd" "user" false .) }}
+{{ range $user := .config.systemd.user }}
+if service_exists --user {{ $user | quote }}; then
+    if ! systemctl --user is-enabled {{ $user | quote }} | grep -q enabled; then
+        log '[systemd] enabling '{{ $user | quote }}
+        systemctl --user enable {{ $user | quote }}
+        systemctl --user start {{ $user | quote }}
+    fi
+else
+    log_err '[systemd] service not found: '{{ $user | quote }}
+fi
+{{ end }}
+{{ end }}
+{{ end }}

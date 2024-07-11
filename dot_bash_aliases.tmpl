@@ -1,0 +1,23 @@
+#!/bin/bash
+#
+# This file is generated automatically and is sent over ssh to the remote host when using kitty
+#      see: [~/.config/kitty/ssh.conf]
+#
+# This should load wl-copy and wl-paste shim functions to allow manipulating the clipboard
+# through SSH.
+#
+{{ .dotfiles.managedMessage | comment "# " }}
+
+{{- $aliased := list 
+
+    "dot_config/shells/exact_rc/01-alias-common.sh" 
+    "dot_config/shells/exact_rc/80-function-common.sh"
+    "dot_config/shells/exact_rc/90-fuzzy-sys.sh"
+    "dot_config/shells/exact_rc/90-docker.sh"
+
+-}}
+{{- range $alias := $aliased }}
+# including: [{{ $alias }}]
+{{ include $alias }}
+
+{{- end }}

@@ -1,0 +1,11 @@
+{{- if lt (len .) 2 -}}
+{{- fail "Wrong argument count: (list . (dict '386' 'x86' 'amd64' 'x64' 'arm' 'arm' 'arm64' 'arm64'))" -}}
+{{- else -}}
+{{- $ctx := (index . 0) -}}
+{{- $dict := (index . 1) -}} 
+{{- if (hasKey $dict $ctx.chezmoi.arch) -}}
+{{- index $dict $ctx.chezmoi.arch -}}
+{{- else -}}
+{{- fail (printf "Unknown arch: %s" $ctx.chezmoi.arch) -}}
+{{- end -}}
+{{- end -}}

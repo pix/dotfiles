@@ -1,0 +1,24 @@
+{{ template "bash-script" . }}
+{{- if not .features.ephemeral }}
+set -eufo pipefail
+
+if ! command -v chsh &> /dev/null && ! command -v zsh &> /dev/null; then
+    log_info "[CHSH] chsh or zsh is not installed"
+    exit 1
+fi
+
+ZSH_SHELL=$(grep /zsh$ /etc/shells | tail -1)
+
+if [ -z "$ZSH_SHELL" ]; then
+    log_err "[CHSH] zsh is not in /etc/shells"
+    exit 0
+fi
+
+if [ "$SHELL" = "$ZSH_SHELL" ]; then
+    log "[CHSH] zsh is already the default shell"
+    exit 0
+fi
+
+c sudo chsh -s "$ZSH_SHELL" {{ .chezmoi.username | quote }}
+
+{{- end }}

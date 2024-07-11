@@ -1,0 +1,26 @@
+{{ template "bash-script" . }}
+{{ if not .features.ephemeral }}
+
+# {{ include (joinPath .chezmoi.homeDir ".config/user-dirs.dirs") | sha256sum }}
+
+# shellcheck disable=SC1091
+. "{{ joinPath .chezmoi.homeDir ".config/user-dirs.dirs" }}"
+
+log "[XDG] Creating user directories"
+
+for i in \
+    XDG_DESKTOP_DIR \
+    XDG_DOWNLOAD_DIR \
+    XDG_TEMPLATES_DIR \
+    XDG_PUBLICSHARE_DIR \
+    XDG_DOCUMENTS_DIR \
+    XDG_MUSIC_DIR \
+    XDG_PICTURES_DIR \
+    XDG_VIDEOS_DIR \
+    ; do
+    if [[ -n "${!i}" ]]; then
+        mkdir -p "${!i}"
+    fi
+    log_info "[XDG] Created ${!i}"
+done
+{{ end -}}

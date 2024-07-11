@@ -1,0 +1,30 @@
+".config/zsh/.zprezto":
+    type: "git-repo"
+    url: "https://github.com/sorin-ionescu/prezto.git"
+    filter:
+        command: "git"
+        args: ["reset", "--hard", "{{ .config.prezto.version }}", "--recurse-submodules"]
+    clone:
+        args: ["--recurse-submodules"]
+
+{{ range $name, $version := .config.zsh.plugins }}
+".config/zsh/plugins/{{ $name | replace "/" "-" }}":
+    type: "git-repo"
+    url: "https://github.com/{{ $name }}"
+    filter:
+        command: "git"
+        args: ["reset", "--hard", "{{ $version }}", "--recurse-submodules"]
+    clone:
+        args: ["--recurse-submodules"]
+{{ end }}
+
+.local/bin/chezmoi:
+  type: "file"
+  url: {{ gitHubLatestReleaseAssetURL "twpayne/chezmoi" (printf "chezmoi-%s-%s" .chezmoi.os .chezmoi.arch) | quote }}
+  executable: true
+
+# doc:command:cht.sh:shell:cht.sh is a community driven cheat sheet for developers
+.local/bin/cht.sh:
+  type: "file"
+  url: "https://cht.sh/:cht.sh"
+  executable: true

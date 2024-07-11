@@ -1,0 +1,16 @@
+{{ if not (dig "features" "ephemeral" false .) }}
+
+{{ $files := list
+    "macchiato.css"
+    "mocha.css"
+    "latte.css"
+    "frappe.css"
+}}
+
+{{ range $file := $files }}
+.config/swaync/themes/{{ $file }}:
+    type: file
+    url: {{ gitHubLatestReleaseAssetURL "catppuccin/swaync" $file | quote }}
+{{ end }}
+
+{{ end }}

@@ -1,0 +1,4 @@
+{{ if eq .chezmoi.osRelease.id "kali" -}}
+# Needed on kali linux
+bindkey '^H' backward-delete-char
+{{- end }}

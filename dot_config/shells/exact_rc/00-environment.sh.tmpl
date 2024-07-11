@@ -1,0 +1,3 @@
+{{- range $key, $val := .config.environment -}}
+{{ $key }}={{ $val | quote }}
+{{- end -}}

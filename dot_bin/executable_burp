@@ -1,0 +1,252 @@
+#!/usr/bin/env python3
+# doc:command:burp:pwning:Manage and run Burp Suite with Jython and JRuby, with the ability to patch missing extensions in Burp Suite\n  See chezmoidata/burp.yaml for the list of extensions
+import requests
+import json
+import re
+import hashlib
+import os
+import subprocess
+import argparse
+import glob
+import configparser
+
+# Versions
+JYTHON_VERSION = '2.7.3'
+JRUBY_VERSION = '9.4.8.0'
+BURP_VERSION = '2024.6.3'
+
+# URLs for Jython and JRuby
+JYTHON_URL = f'https://repo1.maven.org/maven2/org/python/jython-standalone/{JYTHON_VERSION}/jython-standalone-{JYTHON_VERSION}.jar'
+JRUBY_URL = f'https://repo1.maven.org/maven2/org/jruby/jruby-complete/{JRUBY_VERSION}/jruby-complete-{JRUBY_VERSION}.jar'
+
+# URL to fetch the JSON data
+url = 'https://portswigger.net/burp/releases/data?lastId=-1&pageSize=10'
+download_url_template = 'https://portswigger.net/burp/releases/download?product=pro&version={BURP_VERSION}&type=jar'
+
+# Paths to save the JAR files
+base_path = os.path.expanduser('~/.local/burp/classpath')
+burp_jar_path = os.path.join(base_path, 'burpsuite.jar')
+jython_jar_path = os.path.join(base_path, 'jython-standalone.jar')
+jruby_jar_path = os.path.join(base_path, 'jruby-complete.jar')
+
+# Log file
+log_file = os.path.join(base_path, 'download_log.txt')
+
+# Argument parser setup
+parser = argparse.ArgumentParser(description="Manage and run Burp Suite with Jython and JRuby")
+parser.add_argument('--download-only', action='store_true', help="Only download the JAR files without running Burp Suite")
+parser.add_argument('--update', action='store_true', help="Force update of all JAR files")
+parser.add_argument('--patch', action='store_true', help="Patch missing extensions in Burp Suite")
+args = parser.parse_args()
+
+# ANSI escape codes for colors
+COLOR_RED = "\033[91m"
+COLOR_GREEN = "\033[92m"
+COLOR_YELLOW = "\033[93m"
+COLOR_BLUE = "\033[94m"
+COLOR_RESET = "\033[0m"
+
+def log_info(message):
+    print(f"{COLOR_BLUE}[*] {message}{COLOR_RESET}")
+    log_action(f"[*] {message}")
+
+def log_warning(message):
+    print(f"{COLOR_YELLOW}[!] {message}{COLOR_RESET}")
+    log_action(f"[!] {message}")
+
+def log_error(message):
+    print(f"{COLOR_RED}[x] {message}{COLOR_RESET}")
+    log_action(f"[x] {message}")
+
+def log_success(message):
+    print(f"{COLOR_GREEN}[ ] {message}{COLOR_RESET}")
+    log_action(f"[ ] {message}")
+
+# Log the action
+def log_action(message):
+    os.makedirs(os.path.dirname(log_file), exist_ok=True)
+    with open(log_file, 'a') as log:
+        log.write(f"{message}\n")
+
+# Fetch the raw JSON data from the URL
+log_info(f"Fetching JSON data from {url}...")
+response = requests.get(url)
+raw_data = response.text
+
+# Remove control characters
+sanitized_data = re.sub(r'[\x00-\x1F\x7F]', '', raw_data)
+
+# Parse the JSON data
+log_info("Parsing JSON data...")
+parsed_data = json.loads(sanitized_data)
+
+# Extract all builds
+all_builds = []
+for result in parsed_data['ResultSet']['Results']:
+    all_builds.extend(result['builds'])
+
+# Filter for Burp Suite Professional JAR builds
+pro_jar_builds = [build for build in all_builds if build['ProductEdition'] == 'Burp Suite Professional' and build['ProductPlatform'] == 'Jar']
+
+# Extract versions
+versions = [build['Version'] for build in pro_jar_builds]
+
+# Sort versions and get the latest
+latest_version = sorted(versions, key=lambda x: list(map(int, x.split('.'))))[-1]
+
+# Get SHA256 checksum for the latest version
+latest_sha256 = [build['Sha256Checksum'] for build in pro_jar_builds if build['Version'] == latest_version][0]
+
+log_info(f"Latest version: {latest_version}")
+log_info(f"SHA256 checksum: {latest_sha256}")
+
+# Function to calculate the SHA256 checksum of a file
+def calculate_sha256(file_path):
+    sha256 = hashlib.sha256()
+    try:
+        with open(file_path, 'rb') as f:
+            for byte_block in iter(lambda: f.read(4096), b""):
+                sha256.update(byte_block)
+        return sha256.hexdigest()
+    except FileNotFoundError:
+        return None
+
+# Download the JAR file
+def download_jar(url, dest_path):
+    log_info(f"Downloading JAR from {url}...")
+    response = requests.get(url, stream=True)
+    os.makedirs(os.path.dirname(dest_path), exist_ok=True)
+    with open(dest_path, 'wb') as f:
+        for chunk in response.iter_content(chunk_size=8192):
+            f.write(chunk)
+    log_success(f"Downloaded JAR to {dest_path}")
+
+# Verify the checksum and redownload if needed
+def verify_and_download(jar_path, expected_sha256, force_update=False):
+    if os.path.exists(jar_path) and not force_update:
+        log_info(f"Found existing JAR at {jar_path}. Verifying checksum...")
+        current_sha256 = calculate_sha256(jar_path)
+        if current_sha256 == expected_sha256:
+            log_success("Checksum verified. No need to download.")
+            return
+        else:
+            log_warning("Checksum mismatch. Redownloading...")
+    else:
+        log_warning("JAR file not found. Downloading...")
+
+    download_url_template = 'https://portswigger.net/burp/releases/download?product=pro&version={BURP_VERSION}&type=jar'
+    download_url_template = download_url_template.format(BURP_VERSION=latest_version)
+    
+    download_jar(download_url_template, jar_path)
+    log_info(f"Verifying downloaded JAR at {jar_path}...")
+    if calculate_sha256(jar_path) == expected_sha256:
+        log_success("Downloaded and verified successfully.")
+    else:
+        log_error("Checksum verification failed after download.")
+        raise Exception("Checksum verification failed after download.")
+
+import configparser
+
+# Function to parse BappManifest.bmf
+def parse_bapp_manifest(file_path):
+    manifest_data = {}
+    with open(file_path, 'r') as f:
+        for line in f:
+            try:
+                key, value = line.strip().split(': ', 1)
+            except ValueError:
+                continue
+            manifest_data[key] = value
+    return manifest_data
+
+# Patch missing extensions
+def patch_missing_extensions():
+    user_config_path = os.path.expanduser('~/.BurpSuite/UserConfigPro.json')
+    bapps_path = os.path.expanduser('~/.BurpSuite/bapps')
+    
+    if not os.path.exists(user_config_path):
+        log_error(f"User config file not found at {user_config_path}")
+        return
+    
+    with open(user_config_path, 'r') as f:
+        user_config = json.load(f)
+    
+    installed_extensions = []
+    for bapp_manifest_path in glob.glob(f'{bapps_path}/*/BappManifest.bmf'):
+        bapp_manifest = parse_bapp_manifest(bapp_manifest_path)
+        installed_extensions.append({
+            "bapp_serial_version": int(bapp_manifest['SerialVersion']),
+            "bapp_uuid": bapp_manifest['Uuid'],
+            "errors": "ui",
+            "extension_file": os.path.join(os.path.dirname(bapp_manifest_path), bapp_manifest['EntryPoint']),
+            "extension_type": "python" if bapp_manifest['EntryPoint'].endswith('.py') else "java",
+            "loaded": True,
+            "name": bapp_manifest['Name'],
+            "output": "ui"
+        })
+    
+    # Check for missing extensions in user config
+    user_extensions = user_config.get('user_options', {}).get('extender', {}).get('extensions', [])
+    for ext in user_extensions:
+        if not ext.get('bapp_uuid', None):
+            log_error(f"Extension {ext['name']} is missing UUID")
+            # Find the manifest file for this extension
+            path = os.path.join(bapps_path, ext['extension_file'])
+            # bapps/uuid/.....
+            if os.path.exists(path):
+                uuid = ext['extension_file'].split('bapps/')[1]
+                uuid = uuid.split('/')[0]
+                log_info(f"Found missing UUID {uuid} for extension {ext['name']}")
+                manifest = parse_bapp_manifest(os.path.join(bapps_path, uuid, 'BappManifest.bmf'))
+                ext['bapp_uuid'] = manifest['Uuid']
+                ext['bapp_serial_version'] = manifest['SerialVersion']
+                log_success(f"Patched missing UUID for extension {ext['name']}")
+            
+            else:
+                log_error(f"Manifest file not found for extension {ext['name']}: {path}")
+
+    existing_uuids = {ext['bapp_uuid'] for ext in user_extensions if 'bapp_uuid' in ext}
+    for ext in installed_extensions:
+        if ext['bapp_uuid'] not in existing_uuids:
+            log_info(f"Adding missing extension {ext['name']} with UUID {ext['bapp_uuid']}")
+            user_extensions.append(ext)
+
+
+    # Update user config
+    user_config['user_options']['extender']['extensions'] = user_extensions
+    with open(user_config_path, 'w') as f:
+        json.dump(user_config, f, indent=4)
+    log_success("Patched missing extensions in UserConfigPro.json")
+
+
+if args.patch:
+    patch_missing_extensions()
+    exit()
+
+# Check if all JAR files are present
+all_jars_present = os.path.exists(burp_jar_path) and os.path.exists(jython_jar_path) and os.path.exists(jruby_jar_path)
+
+if all_jars_present and not args.update:
+    log_success("All JAR files are present. Skipping update.")
+else:
+    # Download Jython and JRuby if not already downloaded or if force update is enabled
+    if not os.path.exists(jython_jar_path) or args.update:
+        download_jar(JYTHON_URL, jython_jar_path)
+    if not os.path.exists(jruby_jar_path) or args.update:
+        download_jar(JRUBY_URL, jruby_jar_path)
+
+    # Verify the Burp JAR file and download if needed
+    verify_and_download(burp_jar_path, latest_sha256, force_update=args.update)
+
+# Warn if not the latest version
+if not args.update and not all_jars_present:
+    log_warning(f"Warning: Local Burp Suite version is not the latest. Latest version is {latest_version}.")
+
+# Exit if download-only mode is enabled
+if args.download_only:
+    log_info("Download-only mode enabled. Exiting.")
+    exit()
+
+# Run the JAR file using java -cp with the directory in the classpath
+log_info(f"Running JAR file using java -cp {base_path}/* -jar {burp_jar_path}")
+subprocess.run(['java', '-cp', f"{base_path}/*", '-jar', burp_jar_path])

@@ -1,0 +1,33 @@
+{{ template "bash-script" . }}
+{{ if not .features.ephemeral }}
+
+export DEBIAN_FRONTEND=noninteractive
+sudo true # refresh sudo
+
+{{ if eq .chezmoi.osRelease.id "arch" -}}
+##########################################
+if  command -v yay &> /dev/null; then
+    log "[YAY] Installing packages"
+    c sudo pacman -Syu
+    yay -S --noconfirm --needed \
+        {{- range .packages.linux.arch }}
+        {{- range . }}
+            {{ . | quote }} \
+        {{- end }}
+        {{- end }}
+
+        # Empty line
+fi
+{{ end -}}
+
+{{ if or (and (hasKey .chezmoi.osRelease "idLike") (eq .chezmoi.osRelease.idLike "debian")) (eq .chezmoi.osRelease.id "debian") -}}
+##########################################
+{{ template "package-list-install-debian-like" .packages.linux.like_debian }}
+{{ end }}
+
+{{ if eq .chezmoi.osRelease.id "kali" -}}
+##########################################
+{{ template "package-list-install-debian-like" .packages.linux.kali }}
+{{ end }}
+
+{{- end }}

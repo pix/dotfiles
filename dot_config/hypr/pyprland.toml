@@ -1,0 +1,10 @@
+[pyprland]
+plugins = ["expose", "monitors"]
+
+[monitors.placement]
+"Iiyama North America PL2474H 1166802400435".leftOf = "Iiyama North America PLE2483H 1127844524036"
+"LG Display 0x068D".bottomOf = "Iiyama North America PL2474H 1166802400435"
+
+[monitors.placement."LG Electronics LG TV SSCR2 0x01010101"]
+resolution = "1920x1080"
+leftOf = "LG Display 0x068D"

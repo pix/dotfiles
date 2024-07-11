@@ -1,0 +1,28 @@
+{{- if .features.fonts -}}
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Managed by chezmoi -->
+<!DOCTYPE fontconfig SYSTEM "fonts.dtd">
+<fontconfig>
+  <alias binding="strong">
+    <family>sans-serif</family>
+    <prefer>
+      <family>{{ .font.sansserif }}</family>
+      <family>{{ .font.emoji }}</family>
+    </prefer>
+  </alias>
+  <alias binding="strong">
+    <family>serif</family>
+    <prefer>
+      <family>{{ .font.serif }}</family>
+      <family>{{ .font.emoji }}</family>
+    </prefer>
+  </alias>
+  <alias binding="strong">
+    <family>monospace</family>
+    <prefer>
+      <family>{{ .font.mono }}</family>
+      <family>{{ .font.emoji }}</family>
+    </prefer>
+  </alias>
+</fontconfig>
+{{ end -}}

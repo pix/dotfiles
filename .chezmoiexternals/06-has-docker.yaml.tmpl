@@ -1,0 +1,11 @@
+# https://github.com/docker/buildx/releases/download/v0.16.2/buildx-v0.16.2.linux-amd64
+# url: "https://github.com/jdx/mise/releases/latest/download/mise-{{ (gitHubLatestRelease "jdx/mise").TagName }}-{{ .chezmoi.os }}-{{ if eq .chezmoi.arch "amd64" }}x64{{ else }}{{ .chezmoi.arch }}{{ end }}.tar.gz"
+{{ if (dig "features" "docker" "binaries" false .) }}
+{{- $tag := gitHubLatestRelease "docker/buildx" -}}
+# doc:command:docker-buildx:docker:Use docker-buildx to help build docker images
+.docker/cli-plugins/docker-buildx:
+  type: file
+  url: "https://github.com/docker/buildx/releases/download/{{ $tag.TagName }}/buildx-{{ $tag.TagName }}.{{ .chezmoi.os }}-{{ .chezmoi.arch }}"
+  executable: true
+  refreshPeriod: 168h
+{{- end }}

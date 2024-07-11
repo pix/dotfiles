@@ -1,0 +1,12 @@
+[Unit]
+Description=cliphist - clipboard history daemon (image)
+Documentation=man:wl-paste
+PartOf=user-session.target
+
+[Service]
+Type=simple
+Restart=always
+ExecStart=/usr/bin/wl-paste --type image --watch cliphist store
+
+[Install]
+WantedBy=user-session.target

@@ -1,0 +1,47 @@
+{{ template "bash-script" . }}
+{{ if not .features.ephemeral }}
+
+if ! command -v pipx &> /dev/null; then
+    log '[PIP] pipx is not installed'
+    # if we're on a debian-based system, install pipx if available through apt else use the pip user installer
+    if command -v apt &> /dev/null; then
+        # if pipx package is available, install it
+        sudo apt update
+        if apt-cache show pipx &> /dev/null; then
+            sudo apt install -y pipx
+        else
+            log '[PIP] pipx package not available, installing pipx using pip'
+            sudo apt install -y python3-pip python3-venv
+            python3 -m pip install --user pipx
+        fi
+    else
+        {{- if eq .chezmoi.osRelease.id "arch" -}}
+            yay -S python-pipx
+        {{- else }}
+            log_info '[PIP] pipx is not installed and we are not on a debian-based system, skipping'
+            exit 0
+        {{- end }}
+    fi
+fi
+
+# ensure .local/bin is in PATH
+if [ -d "$HOME/.local/bin" ] && [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
+    log '[PIP] Adding ''$''HOME/.local/bin to PATH'
+    export PATH=$HOME/.local/bin:$PATH
+fi
+
+{{ range $key, $value := .packages.pipx }}
+if pipx list --short | awk '{print $1}' | grep -q "^"{{ $key | quote }}"$" &> /dev/null; then
+    log '[PIP] '{{ $value.pkg | quote }}' installed | use pipx upgrade '{{ $value.pkg | quote }}
+else
+    log_info '[PIP] Installing '{{ $value.pkg | quote }}
+    pipx install {{ $value.pkg | quote }}
+    {{ if hasKey $value "inject" }}
+    {{- range $value.inject }}
+    log_info '[PIP] Injecting '{{ . | quote }}' into '{{ $value.pkg | quote }}
+    pipx inject {{ $key | quote }} {{ . | quote }}
+    {{- end }}
+    {{- end }}
+fi
+{{- end }}
+{{- end }}
