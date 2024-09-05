@@ -1,73 +1,4 @@
 packages:
-
-  lazyvim_extras:
-    - lazyvim.plugins.extras.coding.copilot
-    - lazyvim.plugins.extras.coding.copilot-chat
-    - lazyvim.plugins.extras.util.chezmoi
-  
-  lazyvim_extensions:
-    "folke/tokyonight.nvim":
-      opts:
-        transparent: true
-        style: "moon"
-        styles:
-           sidebars: transparent
-           floats: transparent
-    "nosduco/remote-sshfs.nvim":
-      dependencies:
-        - "nvim-telescope/telescope.nvim"
-      opts:
-        # Refer to the configuration section below
-        # or leave empty for defaults
-    "kilavila/nvim-bufferlist":
-      # doc:binding:Ctrl+v Ctrl+v:nvim:Display the buffer selection menu
-      init: |
-        vim.cmd([[
-          map <silent> <C-v><C-v> :BufferListOpen<CR>
-          map <silent> <C-v>v     :BufferListOpen<CR>
-        ]])
-    "lambdalisue/suda.vim":
-      init: |
-        vim.cmd([[
-          let g:suda_smart_edit = 1
-        ]])
-
-
-  # List of VSCode extensions to install
-  # these extensions are installed if code is installed
-  vscode_extensions:
-    helm:
-      - tim-koehler.helm-intellisense
-    go:
-      - golang.go-nightly
-      - golang.go
-    copilot:
-      - github.copilot-chat
-      - github.copilot
-    python:
-      - ms-python.vscode-pylance
-      - ms-python.python
-      - ms-python.debugpy
-    yaml:
-      - redhat.vscode-yaml
-      - ms-kubernetes-tools.vscode-kubernetes-tools
-    candy:
-      - talhabalaj.actual-font-changer
-      - foxundermoon.shell-format
-      - dlasagno.wal-theme
-    remote:
-      - ms-vscode.remote-server
-      - ms-vscode.remote-explorer
-      - ms-vscode-remote.vscode-remote-extensionpack
-      - ms-vscode-remote.remote-wsl
-      - ms-vscode-remote.remote-ssh-edit
-      - ms-vscode-remote.remote-ssh
-      - ms-vscode-remote.remote-containers
-    themes:
-      - monokaiblackwal.monokai-black-wal
-    makefile:
-      - ms-vscode.makefile-tools
-
   # List of packages to install with pipx
   # these packages are installed in ~/.local/pipx/venvs and symlinked to ~/.local/bin
   # Some package are configured in .chezmoitemplates/data/packages.yaml.tmpl
@@ -87,7 +18,6 @@ packages:
 
   # List of packages to install on linux
   linux:
-
     # Common packages for all distributions, hope the package name is the same
     # for all distributions...
     common: &x-common

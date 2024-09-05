@@ -1,0 +1,35 @@
+packages:
+  # List of VSCode extensions to install
+  # these extensions are installed if code is installed
+  vscode_extensions:
+    helm:
+      - tim-koehler.helm-intellisense
+    go:
+      - golang.go-nightly
+      - golang.go
+    copilot:
+      - github.copilot-chat
+      - github.copilot
+    python:
+      - ms-python.vscode-pylance
+      - ms-python.python
+      - ms-python.debugpy
+    yaml:
+      - redhat.vscode-yaml
+      - ms-kubernetes-tools.vscode-kubernetes-tools
+    candy:
+      - talhabalaj.actual-font-changer
+      - foxundermoon.shell-format
+      - dlasagno.wal-theme
+    remote:
+      - ms-vscode.remote-server
+      - ms-vscode.remote-explorer
+      - ms-vscode-remote.vscode-remote-extensionpack
+      - ms-vscode-remote.remote-wsl
+      - ms-vscode-remote.remote-ssh-edit
+      - ms-vscode-remote.remote-ssh
+      - ms-vscode-remote.remote-containers
+    themes:
+      - monokaiblackwal.monokai-black-wal
+    makefile:
+      - ms-vscode.makefile-tools

@@ -135,13 +135,14 @@
 .local/bin/glow:
   type: "archive-file"
   {{- $arch := includeTemplate "get-arch" (list . (dict 
-    "386" "i686" 
+    "386" "i386"
     "amd64" "x86_64" 
     "arm" "arm" 
     "arm64" "aarch64"
   )) }}
-  url: {{ gitHubLatestReleaseAssetURL "charmbracelet/glow" (printf "glow_Linux_%s.tar.gz" $arch) | quote }}
+  url: {{ gitHubLatestReleaseAssetURL "charmbracelet/glow" (printf "glow_*_Linux_%s.tar.gz" $arch) | quote }}
   executable: true
+  stripComponents: 1
   path: glow
 
 # doc:command:fzf:shell:Command-line fuzzy finder

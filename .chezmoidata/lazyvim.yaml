@@ -1,0 +1,42 @@
+packages:
+  # List of extra packages to enable in lazyvim
+  lazyvim_extras:
+    - lazyvim.plugins.extras.coding.copilot
+    - lazyvim.plugins.extras.coding.copilot-chat
+    - lazyvim.plugins.extras.lang.docker
+    - lazyvim.plugins.extras.lang.go
+    - lazyvim.plugins.extras.lang.json
+    - lazyvim.plugins.extras.lang.yaml
+    - lazyvim.plugins.extras.editor.inc-rename
+    - lazyvim.plugins.extras.util.mini-hipatterns
+    - lazyvim.plugins.extras.editor.fzf
+    
+  # List of nvim extensions to install with lazyvim
+  lazyvim_extensions:
+    "folke/tokyonight.nvim":
+      opts:
+        transparent: true
+        style: "moon"
+        styles:
+           sidebars: transparent
+           floats: transparent
+    "nosduco/remote-sshfs.nvim":
+      dependencies:
+        - "nvim-telescope/telescope.nvim"
+      opts:
+        # Refer to the configuration section below
+        # or leave empty for defaults
+    "ibhagwan/fzf-lua":
+      # doc:binding:Ctrl+v Ctrl+v:nvim:Display the buffer selection menu
+      init: |
+        require("fzf-lua").setup()
+        vim.cmd([[
+          map <silent> <C-v><C-v> :FzfLua buffers<CR>
+          map <silent> <C-v>v     :FzfLua buffers<CR>
+        ]])
+        require("fzf-lua").setup_fzfvim_cmds()
+    "lambdalisue/suda.vim":
+      init: |
+        vim.cmd([[
+          let g:suda_smart_edit = 1
+        ]])

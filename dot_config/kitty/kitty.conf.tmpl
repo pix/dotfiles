@@ -10,17 +10,46 @@ include ${HOME}/.cache/wal/colors-kitty.conf
 # wal is not installed, using default colors
 # [[- end ]]
 # [[- end ]]
-
-map ctrl+shift+r kitten reload.py
-
 # doc:binding:Ctrl+Shift+Down:kitty:Create a new tab
 map ctrl+shift+down new_tab
 
 # doc:binding:F1:kitty:Create a new tab with the current working directory (works with kitty's ssh integration too)
 map f1 new_tab_with_cwd
 
-#: Fonts {{{
+font_size 10.2
 
+# doc:binding:Ctrl+Shift+MouseRight:kitty:Open the result of the selected command in nvim in a new tab
+# doc:binding:Ctrl+Shift+G:kitty:Open the result of the previous command in nvim in a new tab
+# doc:binding:Ctrl+Shift+H:kitty:Open the result of the scrollback buffer in nvim in a new tab
+scrollback_lines 20000000
+scrollback_pager sh -c "strip-ansi | nvim"
+
+tab_bar_style powerline
+
+background_opacity 0.5
+background_blur 1
+dynamic_background_opacity yes
+background_tint 1
+dim_opacity 0.4
+
+editor nvim
+
+notify_on_cmd_finish invisible 10.0
+
+# doc:binding:Ctrl+Shift+Plus:kitty:Increase the font size
+# doc:binding:Ctrl+Shift+Minus:kitty:Decrease the font size
+
+map kitty_mod+equal       change_font_size all +0.5
+map kitty_mod+plus        change_font_size all +0.5
+map kitty_mod+minus       change_font_size all -0.5
+map kitty_mod+kp_add      change_font_size all +0.5
+map kitty_mod+kp_subtract change_font_size all -0.5
+
+#################################################################
+# Default kitty configuration file
+#
+
+#: Fonts {{{
 #: kitty has very powerful font management. You can configure
 #: individual font faces and even specify special fonts for particular
 #: characters.
@@ -43,7 +72,7 @@ map f1 new_tab_with_cwd
 #:     italic_font      Operator Mono Book Italic
 #:     bold_italic_font Operator Mono Medium Italic
 
-font_size 10.2
+# font_size 10.2
 
 #: Font size (in pts).
 
@@ -324,7 +353,7 @@ font_size 10.2
 
 #: Scrollback {{{
 
-scrollback_lines 200000
+# scrollback_lines 200000
 
 #: Number of lines of history to keep in memory for scrolling back.
 #: Memory is allocated on demand. Negative numbers are (effectively)
@@ -343,8 +372,7 @@ scrollback_lines 200000
 #: one which means fully opaque, aka visible. Set to a value between
 #: zero and one to make the indicator less visible.
 
-scrollback_pager less -R --chop-long-lines --RAW-CONTROL-CHARS +INPUT_LINE_NUMBER
-
+# scrollback_pager less -R --chop-long-lines --RAW-CONTROL-CHARS +INPUT_LINE_NUMBER
 
 #: Program with which to view scrollback in a new window. The
 #: scrollback buffer is passed as STDIN to this program. If you change
@@ -1004,7 +1032,7 @@ scrollback_pager less -R --chop-long-lines --RAW-CONTROL-CHARS +INPUT_LINE_NUMBE
 #: The second number is the margin between the tab bar and the
 #: contents of the current tab.
 
-tab_bar_style powerline
+# tab_bar_style powerline
 
 #: The tab bar style, can be one of:
 
@@ -1159,7 +1187,7 @@ tab_bar_style powerline
 
 #: The foreground and background colors.
 
-background_opacity 0.5
+# background_opacity 0.5
 
 #: The opacity of the background. A number between zero and one, where
 #: one is opaque and zero is fully transparent. This will only work if
@@ -1183,7 +1211,7 @@ background_opacity 0.5
 #: this option when reloading the config will only work if
 #: dynamic_background_opacity was enabled in the original config.
 
-background_blur 1
+# background_blur 1
 
 #: Set to a positive value to enable background blur (blurring of the
 #: visuals behind a transparent window) on platforms that support it.
@@ -1211,14 +1239,14 @@ background_blur 1
 #: When background image is scaled, whether linear interpolation
 #: should be used.
 
-dynamic_background_opacity yes
+# dynamic_background_opacity yes
 
 #: Allow changing of the background_opacity dynamically, using either
 #: keyboard shortcuts (increase_background_opacity and
 #: decrease_background_opacity) or the remote control facility.
 #: Changing this option by reloading the config is not supported.
 
-background_tint 1
+# background_tint 1
 
 #: How much to tint the background image by the background color. This
 #: option makes it easier to read the text. Tinting is done using the
@@ -1233,7 +1261,7 @@ background_tint 1
 #: multiplicative with background_tint, it can be used to lighten the
 #: tint over the window gaps for a *separated* look.
 
-dim_opacity 0.4
+# dim_opacity 0.4
 
 #: How much to dim text that has the DIM/FAINT attribute set. One
 #: means no dimming and zero means fully dimmed (i.e. invisible).
@@ -1334,7 +1362,7 @@ dim_opacity 0.4
 #: interactive mode and reads its startup rc files. Environment
 #: variables are expanded in this setting.
 
-editor nvim
+# editor nvim
 
 #: The terminal based text editor (such as vim or nano) to use when
 #: editing the kitty config file or similar tasks.
@@ -1626,7 +1654,7 @@ editor nvim
 #:     # Send a notification when a command takes more than 5 seconds in an unfocused window
 #:     notify_on_cmd_finish unfocused
 #:     # Send a notification when a command takes more than 10 seconds in a invisible window
-notify_on_cmd_finish invisible 10.0
+# notify_on_cmd_finish invisible 10.0
 #:     # Ring a bell when a command takes more than 10 seconds in a invisible window
 #:     notify_on_cmd_finish invisible 10.0 bell
 #:     # Run 'notify-send' when a command takes more than 10 seconds in a invisible window
@@ -2231,17 +2259,17 @@ notify_on_cmd_finish invisible 10.0
 
 #: Increase font size
 
-map kitty_mod+equal  change_font_size all +0.5
-map kitty_mod+plus   change_font_size all +0.5
-map kitty_mod+kp_add change_font_size all +0.5
+# map kitty_mod+equal  change_font_size all +0.5
+# map kitty_mod+plus   change_font_size all +0.5
+# map kitty_mod+kp_add change_font_size all +0.5
 # map cmd+plus         change_font_size all +2.0
 # map cmd+equal        change_font_size all +2.0
 # map shift+cmd+equal  change_font_size all +2.0
 
 #: Decrease font size
 
-map kitty_mod+minus       change_font_size all -0.5
-map kitty_mod+kp_subtract change_font_size all -0.5
+# map kitty_mod+minus       change_font_size all -0.5
+# map kitty_mod+kp_subtract change_font_size all -0.5
 # map cmd+minus             change_font_size all -2.0
 # map shift+cmd+minus       change_font_size all -2.0
 

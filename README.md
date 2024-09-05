@@ -126,6 +126,16 @@ Happy configuring!
 
 - **Binding**: `Ctrl+Shift+Down`
   - Create a new tab
+- **Binding**: `Ctrl+Shift+G`
+  - Open the result of the previous command in nvim in a new tab
+- **Binding**: `Ctrl+Shift+H`
+  - Open the result of the scrollback buffer in nvim in a new tab
+- **Binding**: `Ctrl+Shift+Minus`
+  - Decrease the font size
+- **Binding**: `Ctrl+Shift+MouseRight`
+  - Open the result of the selected command in nvim in a new tab
+- **Binding**: `Ctrl+Shift+Plus`
+  - Increase the font size
 - **Binding**: `F1`
   - Create a new tab with the current working directory (works with kitty's ssh integration too)
 

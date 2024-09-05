@@ -67,6 +67,9 @@ return {
       {{- $value | trim | nindent 6 }}
     end,
     {{- else if (eq $key "config") }}
+    config = function()
+      {{- $value | trim | nindent 6 }}
+    end,
     {{- else }}
     {{ template "render_key" (list $key 0) }} {{ template "render_type" (list $value (add $initialIndent -2)) }}
     {{- end }}

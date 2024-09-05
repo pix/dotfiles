@@ -100,7 +100,6 @@ config:
 
       # Low: This extension allows execution of custom Python scripts with HTTP requests/responses.
       # Scripts are typed into the "Python Scripts" tab and executed for each HTTP request/response.
-
       python-scripter:
         uuid: eb563ada801346e6bdb7a7d7c5c52583
         loaded: true
