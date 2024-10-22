@@ -2,8 +2,8 @@
 plugins = ["expose", "monitors"]
 
 [monitors.placement]
-"Iiyama North America PL2474H 1166802400435".leftOf = "Iiyama North America PLE2483H 1127844524036"
-"LG Display 0x068D".bottomOf = "Iiyama North America PL2474H 1166802400435"
+"Iiyama North America PL2492H 11510322E3165".leftOf = "Iiyama North America PL2492H 11510123C4540"
+"LG Display 0x068D".bottomOf = "Iiyama North America PL2492H 11510123C4540"
 
 [monitors.placement."LG Electronics LG TV SSCR2 0x01010101"]
 resolution = "1920x1080"

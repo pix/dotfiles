@@ -1,8 +1,7 @@
 function __can_run_with_compose() {
   # Look for a service using the image $1 inside docker-compose.yml
   image_name=''
-  if [ -f "docker-compose.yml" ];
-  then
+  if [ -f "docker-compose.yml" ]; then
     image_name=$(grep -B1 -A0 "image: $1" docker-compose.yml | head -n1 | awk -F ":" '{print $1}' | tr -d '[:space:]')
   fi
 }
@@ -21,8 +20,7 @@ function dcrun() {
 function docker-run() {
   __can_run_with_compose $1
 
-  if [[ ! -z "${image_name// }" ]];
-  then
+  if [[ ! -z "${image_name// /}" ]]; then
     dcrun $3 $image_name ${@:4}
   else
     drun $1 $2 $3 ${@:4}
@@ -56,3 +54,17 @@ function docker-print() {
     } | less -S
   fi
 }
+
+# doc:function:docker-image-to-dockerfile:docker:Convert a docker image to a Dockerfile.
+docker-image-to-dockerfile() {
+  docker history --no-trunc $1 |
+    tac |
+    tr -s ' ' |
+    cut -d " " -f 5- |
+    sed 's,^/bin/sh -c #(nop) ,,g' |
+    sed 's,^/bin/sh -c,RUN,g' |
+    sed 's, && ,\n  & ,g' |
+    sed 's,\s*[0-9]*[\.]*[0-9]*\s*[kMG]*B\s*$,,g' |
+    head -n
+}
+
